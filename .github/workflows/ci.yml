@@ -28,11 +28,11 @@ jobs:
           fi
       
           # Check base image
-          if ! grep -q '^FROM python:3.11-buster' "$DOCKERFILE"; then
-            echo "❌ Base image is not 'python:3.11-buster'"
+          if ! grep -q '^FROM python:3.11-slim' "$DOCKERFILE"; then
+            echo "❌ Base image is not 'python:3.11-slim'"
             exit 1
           else
-            echo "✅ Base image is 'python:3.11-buster'"
+            echo "✅ Base image is 'python:3.11-slim'"
           fi
       
           # Check WORKDIR
