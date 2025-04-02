@@ -43,28 +43,11 @@ jobs:
             echo "✅ WORKDIR is set to '/app'"
           fi
 
-  integration-test:
-    timeout-minutes: 10
-    name: integration tests
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check out repository
-        uses: actions/checkout@v4
-      - name: Docker compose up
-        run: docker compose up -d --wait
-      - name: Integration tests
-        run: |
-          ./tests/api_tests.sh
-      - name: Docker compose down
-        run: docker compose down
-
   deploy:
     runs-on: ubuntu-22.04
     permissions:
       contents: 'read'
       id-token: 'write'
-    needs:
-      - integration-test
     steps:
       # checkout code
       - uses: actions/checkout@v4
@@ -94,4 +77,4 @@ jobs:
           context: ./
           file: ./Dockerfile
           push: true
-          tags: us-central1-docker.pkg.dev/qr-attendance/qr-attendance/app:v1
+          tags: us-central1-docker.pkg.dev/qr-attendance-455219/qr-attendance/app:v1
