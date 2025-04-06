@@ -26,6 +26,7 @@ public class FirestoreConfig {
         FirebaseOptions options = FirebaseOptions.builder()
                 .setCredentials(credentials)
                 .setProjectId("qr-attendance-455219")
+                .setDatabaseUrl("cs1660project")
                 .build();
 
         if (FirebaseApp.getApps().isEmpty()) {
