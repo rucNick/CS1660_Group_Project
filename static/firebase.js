@@ -56,7 +56,7 @@ function signIn() {
     .then(result => {
       const name = result.user.displayName;
       const uid = result.user.uid;
-      const qrPayload = "http://localhost:9080/confirm";
+      const qrPayload = "https://qr-attendance-1043677821736.us-central1.run.app/confirm";
       QRCode.toCanvas(document.getElementById('qrCanvas'), qrPayload, function (error) {
         if (error) console.error(error);
         console.log('QR code generated');
@@ -102,7 +102,7 @@ function showConfirmation(name, timestamp) {
 }
 
 async function checkAndConfirmAttendance() {
-  if (window.location.pathname === "http://localhost:9080/confirm") {
+  if (window.location.pathname === "https://qr-attendance-1043677821736.us-central1.run.app/confirm") {
     firebase.auth().onAuthStateChanged(async user => {
       if (user) {
         const name = user.displayName;

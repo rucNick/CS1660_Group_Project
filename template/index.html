@@ -42,7 +42,7 @@
       toggle();  
     });
 
-    const authUrl = "http://localhost:9080/confirm";
+    const authUrl = "https://qr-attendance-1043677821736.us-central1.run.app/confirm";
     QRCode.toCanvas(document.getElementById('qrCanvas'), authUrl, function (error) {
       if (error) console.error(error);
       console.log('QR code generated');
