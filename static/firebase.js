@@ -8,38 +8,30 @@
  */
 firebase.initializeApp(config);
 
-// Watch for state change from sign in
 function initApp() {
   firebase.auth().onAuthStateChanged(user => {
     const signInButton = document.getElementById('signInButton');
     if (user) {
-      // User is signed in.
       signInButton.innerText = 'Sign Out';
-      document.getElementById('form').style.display = '';
+      document.getElementById('qrContainer').style.display = '';
     } else {
-      // No user is signed in.
       signInButton.innerText = 'Sign In with Google';
-      document.getElementById('form').style.display = 'none';
+      document.getElementById('qrContainer').style.display = 'none';
     }
   });
 }
 
-// check if authentication is disabled via query parameter
 function authDisabled() {
   const urlParams = new URLSearchParams(window.location.search);
   const hostname = window.location.hostname;
-  // Auth is disabled only if running on localhost and `auth=false` is passed
   return urlParams.get('auth') === 'false' && hostname === 'localhost';
 }
 
-
-// create ID token
 async function createIdToken() {
   if (authDisabled()) {
     console.warn('Auth is disabled. Returning dummy ID token.');
-    return new Promise((resolve) => {
-        resolve('dummyToken');  // return a dummy ID token
-    })
+    return new Promise(resolve => 
+      resolve('dummyToken'));
   } else {
     return await firebase.auth().currentUser.getIdToken();
   }
@@ -58,18 +50,22 @@ window.onload = function () {
 
 function signIn() {
   const provider = new firebase.auth.GoogleAuthProvider();
-  provider.addScope('https://www.googleapis.com/auth/userinfo.email');
   firebase
     .auth()
     .signInWithPopup(provider)
     .then(result => {
-      // Returns the signed in user along with the provider's credential
-      console.log(`${result.user.displayName} logged in.`);
-      window.alert(`Welcome ${result.user.displayName}!`);
+      const name = result.user.displayName;
+      const uid = result.user.uid;
+      const qrPayload = "http://localhost:9080/confirm";
+      QRCode.toCanvas(document.getElementById('qrCanvas'), qrPayload, function (error) {
+        if (error) console.error(error);
+        console.log('QR code generated');
+      });
+      window.alert(`Welcome ${name}!`);
     })
     .catch(err => {
-      console.log(`Error during sign in: ${err.message}`);
-      window.alert(`Sign in failed. Retry or check your browser logs.`);
+      console.log(`Sign in error: ${err.message}`);
+      window.alert(`Sign in failed.`);
     });
 }
 
@@ -77,14 +73,12 @@ function signOut() {
   firebase
     .auth()
     .signOut()
-    .then(result => {})
     .catch(err => {
-      console.log(`Error during sign out: ${err.message}`);
-      window.alert(`Sign out failed. Retry or check your browser logs.`);
-    });
+      console.log(`Sign out error: ${err.message}`);
+      window.alert(`Sign out failed.`);
+  });
 }
 
-// Toggle Sign in/out button
 function toggle() {
   if (authDisabled()) {
     window.alert('Auth is disabled.');
@@ -97,50 +91,32 @@ function toggle() {
   }
 }
 
-/**
- * DO NOT ALTER ANY CODE ABOVE THIS COMMENT
- * ++++ ADD YOUR CODE BELOW ++++
- * === VOTE FUNCTION ===
- */
+function showConfirmation(name, timestamp) {
+  const container = document.getElementById("confirmationContainer");
+  container.innerHTML = `
+    <span style="font-size: 5rem;">✅</span>
+    <h5>Attendance Confirmed</h5>
+    <p><strong>${name}</strong> checked in at <em>${timestamp}</em></p>
+  `;
+  document.getElementById("qrContainer").style.display = "none";
+}
 
-/**
- * Sends the user's vote to the server.
- * @param team
- * @returns {Promise<void>}
- */
-async function vote(team) {
-  console.log(`Submitting vote for ${team}...`);
-  if (firebase.auth().currentUser || authDisabled()) {
-    // Retrieve JWT to identify the user to the Identity Platform service.
-    // Returns the current token if it has not expired. Otherwise, this will
-    // refresh the token and return a new one.
-    try {        
-      //get da token 
-      const token = await createIdToken();
-
-      const voteInfo = new URLSearchParams({team});
-
-      const response = await fetch('/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'Authorization': `Bearer ${token}`
-        },
-        body: voteInfo
-      });
-
-      if (!response.ok) {
-        throw new Error(`${response.status}`);
+async function checkAndConfirmAttendance() {
+  if (window.location.pathname === "http://localhost:9080/confirm") {
+    firebase.auth().onAuthStateChanged(async user => {
+      if (user) {
+        const name = user.displayName;
+        const uid = user.uid;
+        const timestamp = await markAttendance(name, uid);
+        if (timestamp) {
+          showConfirmation(name, timestamp);
+        } else {
+          document.getElementById("confirmationContainer").innerHTML = `<h5>Failed to mark attendance.</h5>`;
+        }
+      } else {
+        window.alert("You must be signed in to mark attendance.");
       }
-
-      console.log(`Success!`);
-      window.alert('Success!');
-
-    } catch (err) {
-      console.log(`Error when submitting vote: ${err}`);
-      window.alert('Something went wrong... Please try again!');
-    }
-  } else {
-    window.alert('User not signed in.');
+    });
   }
 }
+

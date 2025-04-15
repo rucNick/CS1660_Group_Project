@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Attendance Confirmation</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+  <script src="https://www.gstatic.com/firebasejs/8.0/firebase.js"></script>
+  <script src="/static/config.js"></script>
+  <script src="/static/firebase.js"></script>
+</head>
+<body class="blue lighten-5">
+  <div class="container center" style="margin-top: 50px;">
+    <div id="confirmationContainer">
+      <h5>Checking attendance...</h5>
+    </div>
+  </div>
+
+  <script>
+    firebase.auth().onAuthStateChanged(async user => {
+      if (user) {
+        const name = user.displayName;
+        const uid = user.uid;
+        const form = new URLSearchParams({ name, uid });
+
+        const res = await fetch("/attend", {
+          method: "POST",
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: form
+        });
+
+        const container = document.getElementById("confirmationContainer");
+        if (res.ok) {
+          const data = await res.json();
+          container.innerHTML = `
+            <span style="font-size: 5rem;">✅</span>
+            <h5>Attendance Confirmed</h5>
+            <p><strong>${name}</strong> checked in at <em>${new Date(data.timestamp).toLocaleString()}</em></p>
+          `;
+        } else {
+          container.innerHTML = "<h5>Failed to mark attendance.</h5>";
+        }
+      } else {
+        document.getElementById("confirmationContainer").innerHTML = "<h5>You must be signed in to mark attendance.</h5>";
+      }
+    });
+  </script>
+</body>
+</html>
