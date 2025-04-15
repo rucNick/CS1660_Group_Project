@@ -29,6 +29,9 @@ jobs:
         distribution: 'temurin'
         cache: maven
     
+    - name: Set execute permission for Maven wrapper
+      run: chmod +x AuthServer/mvnw
+    
     - name: Build with Maven
       run: cd AuthServer && ./mvnw clean package -DskipTests
 
@@ -46,6 +49,9 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
+    
+    - name: Set execute permission for Maven wrapper
+      run: chmod +x AuthServer/mvnw
     
     - name: Build with Maven
       run: cd AuthServer && ./mvnw clean package -DskipTests
