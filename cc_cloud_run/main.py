@@ -11,7 +11,7 @@ app.mount("/static", StaticFiles(directory="/app/static"), name="static")
 templates = Jinja2Templates(directory="/app/template")
 
 db = firestore.Client()
-votes_collection = db.collection("attendance")
+attendance_collection = db.collection("attendance")
 
 @app.get("/")
 async def read_root(request: Request):
@@ -22,10 +22,10 @@ async def read_root(request: Request):
         "attendance_data": attendance_data
     })
 
-@app.post("/attend")
+@app.post("/")
 async def mark_attendance(name: Annotated[str, Form()], uid: Annotated[str, Form()]):
     timestamp = datetime.datetime.utcnow().isoformat()
-    db.collection("attendance").add({
+    attendance_collection.add({
         "name": name,
         "uid": uid,
         "timestamp": timestamp
