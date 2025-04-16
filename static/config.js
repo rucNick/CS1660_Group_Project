@@ -14,6 +14,6 @@
  * @type {{apiKey: string, authDomain: string}}
  */
 const config = {
-  apiKey: 'AIzaSyB2vjwH2d7fdt18k7YtwPmIZJcXGe7Hk3g',
-  authDomain: 'cc-assns.firebaseapp.com',
+  apiKey: 'AIzaSyDVkci0EQT8TilpS8OEgRebMcpIf7rKBoc',
+  authDomain: 'qr-attendance-455219.firebaseapp.com',
 };
