@@ -13,10 +13,10 @@ function initApp() {
     const signInButton = document.getElementById('signInButton');
     if (user) {
       signInButton.innerText = 'Sign Out';
-      document.getElementById('qrContainer').style.display = '';
+      document.getElementById('bodyInfo').style.display = '';
     } else {
       signInButton.innerText = 'Sign In with Google';
-      document.getElementById('qrContainer').style.display = 'none';
+      document.getElementById('bodyInfo').style.display = 'none';
     }
   });
 }
@@ -30,7 +30,7 @@ function authDisabled() {
 async function createIdToken() {
   if (authDisabled()) {
     console.warn('Auth is disabled. Returning dummy ID token.');
-    return new Promise(resolve => 
+    return new Promise(resolve =>
       resolve('dummyToken'));
   } else {
     return await firebase.auth().currentUser.getIdToken();
@@ -50,18 +50,14 @@ window.onload = function () {
 
 function signIn() {
   const provider = new firebase.auth.GoogleAuthProvider();
+  provider.addScope('https://www.googleapis.com/auth/userinfo.email');
   firebase
     .auth()
     .signInWithPopup(provider)
     .then(result => {
-      const name = result.user.displayName;
-      const uid = result.user.uid;
-      const qrPayload = "https://qr-attendance-1043677821736.us-central1.run.app/confirm";
-      QRCode.toCanvas(document.getElementById('qrCanvas'), qrPayload, function (error) {
-        if (error) console.error(error);
-        console.log('QR code generated');
-      });
-      window.alert(`Welcome ${name}!`);
+      // Returns the signed in user along with the provider's credential
+      console.log(`${result.user.displayName} logged in.`);
+      window.alert(`Welcome ${result.user.displayName}!`);
     })
     .catch(err => {
       console.log(`Sign in error: ${err.message}`);
@@ -76,7 +72,7 @@ function signOut() {
     .catch(err => {
       console.log(`Sign out error: ${err.message}`);
       window.alert(`Sign out failed.`);
-  });
+    });
 }
 
 function toggle() {
@@ -92,31 +88,55 @@ function toggle() {
 }
 
 function showConfirmation(name, timestamp) {
+  const dateCheckedIn = new Date(timestamp);
   const container = document.getElementById("confirmationContainer");
   container.innerHTML = `
     <span style="font-size: 5rem;">✅</span>
     <h5>Attendance Confirmed</h5>
-    <p><strong>${name}</strong> checked in at <em>${timestamp}</em></p>
+    <p><strong>${name}</strong> checked in on <em>${dateCheckedIn.toLocaleDateString()}</em></p>
   `;
-  document.getElementById("qrContainer").style.display = "none";
 }
 
-async function checkAndConfirmAttendance() {
-  if (window.location.pathname === "https://qr-attendance-1043677821736.us-central1.run.app/confirm") {
-    firebase.auth().onAuthStateChanged(async user => {
-      if (user) {
-        const name = user.displayName;
-        const uid = user.uid;
-        const timestamp = await markAttendance(name, uid);
-        if (timestamp) {
-          showConfirmation(name, timestamp);
-        } else {
-          document.getElementById("confirmationContainer").innerHTML = `<h5>Failed to mark attendance.</h5>`;
-        }
-      } else {
-        window.alert("You must be signed in to mark attendance.");
+async function checkIn() {
+  console.log(`Checking in for...`);
+  if (firebase.auth().currentUser || authDisabled()) {
+    // Retrieve JWT to identify the user to the Identity Platform service.
+    // Returns the current token if it has not expired. Otherwise, this will
+    // refresh the token and return a new one.
+    try {
+      const token = await createIdToken();
+
+      /*
+       * ++++ YOUR CODE HERE ++++
+       */
+      const formData = new URLSearchParams();
+      const user = firebase.auth().currentUser;
+
+      const name = user.displayName;
+      formData.append('name', name);
+      const uid = user.uid;
+      formData.append('uid', uid);
+
+      const response = await fetch('/attend', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData.toString()
+      });
+
+      if (response.ok) {
+        window.alert("Attendance marked successfully!");
+        showConfirmation(name, Date.now());
       }
-    });
+
+    } catch (err) {
+      console.log(`Error when checking in: ${err}`);
+      window.alert('Something went wrong... Please try again!');
+    }
+  } else {
+    window.alert('User not signed in.');
   }
 }
 

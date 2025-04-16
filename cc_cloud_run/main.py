@@ -22,7 +22,7 @@ async def read_root(request: Request):
         "attendance_data": attendance_data
     })
 
-@app.post("/")
+@app.post("/attend")
 async def mark_attendance(name: Annotated[str, Form()], uid: Annotated[str, Form()]):
     timestamp = datetime.datetime.utcnow().isoformat()
     attendance_collection.add({
