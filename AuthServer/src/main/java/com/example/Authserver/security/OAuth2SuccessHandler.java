@@ -7,6 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
@@ -21,6 +22,9 @@ import java.util.concurrent.ExecutionException;
 public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
     private final UserService userService;
+
+    @Value("${frontend.url:http://localhost:3000}")
+    private String frontendUrl;
 
     @Autowired
     public OAuth2SuccessHandler(UserService userService) {
@@ -45,9 +49,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         User user;
         try {
             user = userService.findOrCreateGoogleUser(googleId, email, name);
-        } catch (ExecutionException e) {
-            throw new RuntimeException(e);
-        } catch (InterruptedException e) {
+        } catch (ExecutionException | InterruptedException e) {
             throw new RuntimeException(e);
         }
 
@@ -55,13 +57,13 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         HttpSession session = request.getSession();
         session.setAttribute("userId", user.getId());
 
-        // Redirect based on whether role is assigned
+        // Redirect to frontend based on role assignment
         if (!user.isRoleAssigned()) {
-            // Redirect to role selection page if role not assigned
-            response.sendRedirect("/api/auth/role");
+            // Redirect to frontend role selection page with userId
+            response.sendRedirect(frontendUrl + "/select-role?userId=" + user.getId());
         } else {
-            // Redirect to dashboard if role is already assigned
-            response.sendRedirect("/dashboard");
+            // Redirect to frontend dashboard
+            response.sendRedirect(frontendUrl + "/dashboard?userId=" + user.getId());
         }
     }
 }

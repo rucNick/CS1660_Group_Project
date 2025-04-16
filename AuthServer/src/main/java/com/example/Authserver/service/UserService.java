@@ -94,4 +94,7 @@ public class UserService {
     public boolean verifyPassword(User user, String password) {
         return passwordEncoder.matches(password, user.getPassword());
     }
+    public Optional<User> findById(String id) throws ExecutionException, InterruptedException {
+        return userRepository.findById(id);
+    }
 }
