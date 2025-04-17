@@ -1,4 +1,4 @@
-name: Auth Server CI/CD for App Engine
+name: Auth Server CI/CD for Cloud Run
 
 on:
   push:
@@ -14,6 +14,7 @@ on:
 env:
   PROJECT_ID: qr-attendance-455219
   REGION: us-central1
+  SERVICE_NAME: auth-server
 
 jobs:
   build:
@@ -28,10 +29,10 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
-    
+        
     - name: Set execute permission for Maven wrapper
       run: chmod +x AuthServer/mvnw
-    
+        
     - name: Build with Maven
       run: cd AuthServer && ./mvnw clean package -DskipTests
 
@@ -42,71 +43,68 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
-    
+      
     - name: Set up JDK 17
       uses: actions/setup-java@v3
       with:
         java-version: '17'
         distribution: 'temurin'
         cache: maven
-    
+        
     - name: Set execute permission for Maven wrapper
       run: chmod +x AuthServer/mvnw
-    
+        
     - name: Build with Maven
       run: cd AuthServer && ./mvnw clean package -DskipTests
-    
+      
     - name: Authenticate to Google Cloud
       uses: google-github-actions/auth@v1
       with:
         credentials_json: ${{ secrets.GCP_AUTH }}
-    
+        
     - name: Set up Cloud SDK
       uses: google-github-actions/setup-gcloud@v1
       with:
         project_id: ${{ env.PROJECT_ID }}
-    
+        
     - name: Enable required APIs
       run: |
         # Enable required APIs
-        gcloud services enable appengine.googleapis.com --quiet || true
         gcloud services enable cloudbuild.googleapis.com --quiet || true
+        gcloud services enable run.googleapis.com --quiet || true
+        gcloud services enable artifactregistry.googleapis.com --quiet || true
         gcloud services enable firestore.googleapis.com --quiet || true
+        
+    - name: Build and push container image
+      uses: google-github-actions/setup-gcloud@v1
+      with:
+        install_components: "beta"
     
-    - name: Create app.yaml
+    - name: Build and Push Docker Image to Google Container Registry
       run: |
         cd AuthServer
-        mkdir -p src/main/appengine
-        cat > src/main/appengine/app.yaml << 'EOF'
-        runtime: java17
-        instance_class: F2
+        # Configure docker to use the gcloud command-line tool as a credential helper
+        gcloud auth configure-docker
         
-        env_variables:
-          SPRING_PROFILES_ACTIVE: 'production'
-          GOOGLE_CLIENT_ID: '1043677821736-sd578og9up9kkobht663q1dchucsrhep.apps.googleusercontent.com'
-          GOOGLE_CLIENT_SECRET: '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'
+        # Build the Docker image
+        docker build -t gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ github.sha }} .
         
-        handlers:
-          - url: /.*
-            script: auto
-            secure: always
+        # Push the Docker image to Google Container Registry
+        docker push gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ github.sha }}
         
-        automatic_scaling:
-          min_instances: 1
-          max_instances: 5
-          min_idle_instances: 1
-          max_idle_instances: 2
-          target_cpu_utilization: 0.65
-          target_throughput_utilization: 0.65
-          max_concurrent_requests: 50
-        EOF
-    
-    - name: Deploy to App Engine
+    - name: Deploy to Cloud Run
       run: |
-        cd AuthServer
-        gcloud app deploy src/main/appengine/app.yaml --project=${{ env.PROJECT_ID }} --quiet
-    
+        gcloud run deploy ${{ env.SERVICE_NAME }} \
+          --image gcr.io/${{ env.PROJECT_ID }}/${{ env.SERVICE_NAME }}:${{ github.sha }} \
+          --platform managed \
+          --region ${{ env.REGION }} \
+          --allow-unauthenticated \
+          --memory 512Mi \
+          --cpu 1 \
+          --port 8080 \
+          --set-env-vars="SPRING_PROFILES_ACTIVE=production,GOOGLE_CLIENT_ID=1043677821736-sd578og9up9kkobht663q1dchucsrhep.apps.googleusercontent.com,GOOGLE_CLIENT_SECRET=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"
+          
     - name: Show deployment URL
       run: |
-        echo "Auth Server URL: https://${{ env.PROJECT_ID }}.uc.r.appspot.com"
-        echo "Auth Server deployed to App Engine"
+        echo "Auth Server URL: $(gcloud run services describe ${{ env.SERVICE_NAME }} --platform managed --region ${{ env.REGION }} --format 'value(status.url)')"
+        echo "Auth Server deployed to Cloud Run"
