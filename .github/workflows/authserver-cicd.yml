@@ -16,32 +16,11 @@ env:
   REGION: us-central1
   SERVICE_NAME: auth-server
   REPOSITORY: qr-attendance
-  ARTIFACT_REPO: us-central1-docker.pkg.dev/${{ github.event.repository.owner.name }}-${{ github.event.repository.name }}/auth-server
 
 jobs:
-  build:
+  build-and-deploy:
     runs-on: ubuntu-latest
-    steps:
-    - name: Checkout code
-      uses: actions/checkout@v3
-      
-    - name: Set up JDK 17
-      uses: actions/setup-java@v3
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        cache: maven
-        
-    - name: Set execute permission for Maven wrapper
-      run: chmod +x AuthServer/mvnw
-        
-    - name: Build with Maven
-      run: cd AuthServer && ./mvnw clean package -DskipTests
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main' || github.ref == 'refs/heads/master' || github.event_name == 'workflow_dispatch'
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository)
     steps:
     - name: Checkout code
       uses: actions/checkout@v3
@@ -56,19 +35,6 @@ jobs:
       with:
         project_id: ${{ env.PROJECT_ID }}
         
-    - name: Set up JDK 17
-      uses: actions/setup-java@v3
-      with:
-        java-version: '17'
-        distribution: 'temurin'
-        cache: maven
-        
-    - name: Set execute permission for Maven wrapper
-      run: chmod +x AuthServer/mvnw
-        
-    - name: Build with Maven
-      run: cd AuthServer && ./mvnw clean package -DskipTests
-      
     - name: Enable required APIs
       run: |
         gcloud services enable cloudbuild.googleapis.com --quiet || true
@@ -96,11 +62,10 @@ jobs:
     - name: Build and Push Docker Image
       run: |
         cd AuthServer
-        # Build the Docker image
-        docker build -t ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE_NAME }}:${{ github.sha }} .
         
-        # Push the Docker image to Artifact Registry
-        docker push ${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE_NAME }}:${{ github.sha }}
+        # Build the Docker image directly with Cloud Build
+        gcloud builds submit \
+          --tag=${{ env.REGION }}-docker.pkg.dev/${{ env.PROJECT_ID }}/${{ env.REPOSITORY }}/${{ env.SERVICE_NAME }}:${{ github.sha }}
         
     - name: Deploy to Cloud Run
       run: |
@@ -109,10 +74,7 @@ jobs:
           --platform managed \
           --region ${{ env.REGION }} \
           --allow-unauthenticated \
-          --port 8080 \
-          --set-env-vars="SPRING_PROFILES_ACTIVE=production" \
-          --set-env-vars="GOOGLE_CLIENT_ID=1043677821736-sd578og9up9kkobht663q1dchucsrhep.apps.googleusercontent.com" \
-          --set-env-vars="GOOGLE_CLIENT_SECRET=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"
+          --set-env-vars="PORT=8080,SPRING_PROFILES_ACTIVE=production,FRONTEND_URL=https://qr-attendance-1043677821736.us-central1.run.app,PROJECT_ID=${{ env.PROJECT_ID }},GOOGLE_CLIENT_ID=1043677821736-sd578og9up9kkobht663q1dchucsrhep.apps.googleusercontent.com,GOOGLE_CLIENT_SECRET=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"
           
     - name: Show deployment URL
       run: |
