@@ -87,13 +87,13 @@ function toggle() {
   }
 }
 
-function showConfirmation(name, timestamp) {
+function showConfirmation(name, timestamp, courseId) {
   const dateCheckedIn = new Date(timestamp);
   const container = document.getElementById("confirmationContainer");
   container.innerHTML = `
     <span style="font-size: 5rem;">✅</span>
     <h5>Attendance Confirmed</h5>
-    <p><strong>${name}</strong> checked in on <em>${dateCheckedIn.toLocaleDateString()}</em></p>
+    <p><strong>${name}</strong> checked into ${courseId} on <em>${dateCheckedIn.toLocaleDateString()}</em></p>
   `;
 }
 
@@ -112,10 +112,15 @@ async function checkIn() {
       const formData = new URLSearchParams();
       const user = firebase.auth().currentUser;
 
+      
+      const params = new URLSearchParams(window.location.search);
+      const courseId = params.get("courseId");
+
       const name = user.displayName;
       formData.append('name', name);
       const uid = user.uid;
       formData.append('uid', uid);
+      formData.append('courseId', courseId);
 
       const response = await fetch('/attend', {
         method: 'POST',
@@ -128,7 +133,7 @@ async function checkIn() {
 
       if (response.ok) {
         window.alert("Attendance marked successfully!");
-        showConfirmation(name, Date.now());
+        showConfirmation(name, Date.now(), courseId);
       }
 
     } catch (err) {
