@@ -33,12 +33,12 @@ public class AuthController {
         this.userService = userService;
     }
 
-    @Operation(summary = "Get login info", description = "Returns information for the login page")
-    @GetMapping("/login")
-    public ResponseEntity<?> loginPage() {
-        // Return an empty success response when frontend requests login page info
-        return ResponseEntity.ok(Map.of("message", "Login endpoint ready"));
-    }
+//    @Operation(summary = "Get login info", description = "Returns information for the login page")
+//    @GetMapping("/login")
+//    public ResponseEntity<?> loginPage() {
+//        // Return an empty success response when frontend requests login page info
+//        return ResponseEntity.ok(Map.of("message", "Login endpoint ready"));
+//    }
 
     @Operation(summary = "User login", description = "Authenticates a user with email and password",
             responses = {

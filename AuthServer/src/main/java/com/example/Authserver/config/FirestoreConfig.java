@@ -30,7 +30,6 @@ public class FirestoreConfig {
             if (credentialsFile.exists()) {
                 credentials = GoogleCredentials.fromStream(credentialsFile.getInputStream());
             } else {
-                // For App Engine
                 credentials = GoogleCredentials.getApplicationDefault();
             }
         } catch (Exception e) {
