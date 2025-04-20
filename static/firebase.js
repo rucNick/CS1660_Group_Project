@@ -193,6 +193,7 @@ async function checkIn() {
       
       const params = new URLSearchParams(window.location.search);
       const courseId = params.get("courseId");
+      const selectedRole = params.get("role");
 
       if (!courseId) {
         window.alert("Please select a course first.");
@@ -204,6 +205,7 @@ async function checkIn() {
       const uid = user.uid;
       formData.append('uid', uid);
       formData.append('courseId', courseId);
+      formData.append("role", selectedRole);
 
       const response = await fetch('/attend', {
         method: 'POST',
