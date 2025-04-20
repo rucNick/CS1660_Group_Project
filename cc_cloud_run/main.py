@@ -37,6 +37,23 @@ async def mark_attendance(name: Annotated[str, Form()], uid: Annotated[str, Form
 async def confirm_page(request: Request):
     return templates.TemplateResponse("confirm.html", {"request": request})
 
+@app.post("/saveProfile")
+async def save_profile(
+    name: Annotated[str, Form()],
+    uid: Annotated[str, Form()],
+    role: Annotated[str, Form()],
+    courseId: Annotated[str, Form()]
+):
+    db.collection("users").document(uid).set({
+        "name": name,
+        "uid": uid,
+        "role": role,
+        "courseId": courseId,
+        "updated": datetime.datetime.utcnow().isoformat()
+    }, merge=True)
+    return {"detail": "Profile saved"}
+
+
 @app.get("/professor/{user_id}")
 async def professor_page(request: Request, user_id: str):
     return templates.TemplateResponse("professor.html", {"request": request, "user_id": user_id})

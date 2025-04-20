@@ -204,3 +204,43 @@ async function checkIn() {
   }
 }
 
+document.getElementById('submitRoleCourse').addEventListener('click', async () => {
+  const role = document.getElementById('roleSelect').value;
+  const courseId = document.getElementById('courseSelect').value;
+
+  if (!role || !courseId) {
+    window.alert('Please select both a role and course.');
+    return;
+  }
+
+  try {
+    const token = await createIdToken();
+    const user = firebase.auth().currentUser;
+
+    const formData = new URLSearchParams();
+    formData.append('name', user.displayName);
+    formData.append('uid', user.uid);
+    formData.append('role', role);
+    formData.append('courseId', courseId);
+
+    const response = await fetch('/saveProfile', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': `Bearer ${token}`
+      },
+      body: formData.toString()
+    });
+
+    if (response.ok) {
+      console.log('Role and course saved.');
+    } else {
+      throw new Error('Failed to save profile.');
+    }
+  } catch (err) {
+    console.log(`Error saving profile: ${err}`);
+    window.alert('Failed to save role and course.');
+  }
+});
+
+
