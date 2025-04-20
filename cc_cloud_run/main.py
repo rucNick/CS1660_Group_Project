@@ -41,10 +41,12 @@ async def confirm_page(request: Request):
 
 @app.get("/professor/{user_id}")
 async def professor_page(request: Request, user_id: str):
+    print(f"Fetching professor data for user_id: {user_id}")
     user_ref = db.collection('users').document(user_id)
     user_data = user_ref.get().to_dict()
 
     if not user_data or user_data.get('role') != 'Professor':
+        print("Access denied or user not a professor.")
         raise HTTPException(status_code=403, detail="Access forbidden. Not a professor.")
 
     course_id = user_data.get('courseId')
