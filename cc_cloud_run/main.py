@@ -34,6 +34,15 @@ async def mark_attendance(name: Annotated[str, Form()], uid: Annotated[str, Form
     })
     return {"detail": "Attendance recorded", "timestamp": timestamp}
 
+@app.post("/submit")
+async def mark_attendance(courseId: Annotated[str, Form()], role: Annotated[str, Form()]):
+    attendance_collection.add({
+        "courseId": courseId,
+        "role": role,
+    })
+    return {}
+
+
 @app.get("/confirm")
 async def confirm_page(request: Request):
     return templates.TemplateResponse("confirm.html", {"request": request})

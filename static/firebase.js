@@ -136,7 +136,6 @@ async function checkIn() {
       
       const params = new URLSearchParams(window.location.search);
       const courseId = params.get("courseId");
-      const role = params.get("role");
 
       if (!courseId) {
         window.alert("Please select a course first.");
@@ -148,9 +147,52 @@ async function checkIn() {
       const uid = user.uid;
       formData.append('uid', uid);
       formData.append('courseId', courseId);
-      formData.append("role", role);
+
 
       const response = await fetch('/attend', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': `Bearer ${token}`
+        },
+        body: formData.toString()
+      });
+
+      if (response.ok) {
+        window.alert("Attendance marked successfully!");
+        showConfirmation(name, Date.now(), courseId);
+      }
+
+    } catch (err) {
+      console.log(`Error when checking in: ${err}`);
+      window.alert('Something went wrong... Please try again!');
+    }
+  } else {
+    window.alert('User not signed in.');
+  }
+}
+
+async function submit() {
+  if (firebase.auth().currentUser || authDisabled()) {
+    try {
+      const token = await createIdToken();
+
+      const formData = new URLSearchParams();
+      const user = firebase.auth().currentUser;
+      
+      const params = new URLSearchParams(window.location.search);
+      const courseId = params.get("courseId");
+      const role = params.get("role");
+
+      if (!courseId) {
+        window.alert("Please select a course first.");
+        return;
+      }
+
+      formData.append('courseId', courseId);
+      formData.append("role", role);
+
+      const response = await fetch('/submit', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -172,7 +214,6 @@ async function checkIn() {
     window.alert('User not signed in.');
   }
 }
-
 
 
 
