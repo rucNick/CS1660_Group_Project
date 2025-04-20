@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Professor Dashboard</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
+</head>
+<body class="blue lighten-5">
+  <nav class="blue darken-2">
+    <div class="nav-wrapper container">
+      <a class="brand-logo center">Professor Dashboard</a>
+    </div>
+  </nav>
+
+  <div id="attendanceList" style="padding: 20px;">
+    <h4>Students' Attendance</h4>
+    <div id="attendanceData"></div>
+  </div>
+
+  <script src="https://www.gstatic.com/firebasejs/7.18/firebase-app.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/8.0/firebase.js"></script>
+  <script src="/static/config.js"></script>
+  <script src="/static/firebase.js"></script>
+
+  <script>
+    const userId = window.location.pathname.split('/').pop(); 
+    const db = firebase.firestore();
+
+    async function loadAttendanceData() {
+      const userRef = db.collection('users').doc(userId);
+      const userDoc = await userRef.get();
+      
+      if (userDoc.exists) {
+        const userData = userDoc.data();
+        
+        if (userData.role === 'Professor') {
+          const courses = userData.courses;
+          const attendanceList = document.getElementById('attendanceData');
+
+          for (const courseId of courses) {
+            const attendanceQuery = db.collection('attendance').where('courseId', '==', courseId).get();
+            const attendanceSnapshot = await attendanceQuery;
+            
+            attendanceSnapshot.forEach(doc => {
+              const attendanceData = doc.data();
+              const studentName = attendanceData.name;
+              const timestamp = new Date(attendanceData.timestamp).toLocaleString();
+              attendanceList.innerHTML += `
+                <div class="card">
+                  <div class="card-content">
+                    <span class="card-title">${studentName} - ${courseId}</span>
+                    <p>Attendance Time: ${timestamp}</p>
+                  </div>
+                </div>
+              `;
+            });
+          }
+        } else {
+          window.alert("You are not a professor!");
+        }
+      } else {
+        window.alert("Professor data not found.");
+      }
+    }
+
+    window.onload = loadAttendanceData;
+  </script>
+</body>
+</html>

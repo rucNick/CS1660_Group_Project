@@ -51,19 +51,81 @@ window.onload = function () {
 function signIn() {
   const provider = new firebase.auth.GoogleAuthProvider();
   provider.addScope('https://www.googleapis.com/auth/userinfo.email');
+
   firebase
-    .auth()
-    .signInWithPopup(provider)
-    .then(result => {
-      // Returns the signed in user along with the provider's credential
+  .auth()
+  .signInWithPopup(provider)
+  .then(result => {
+    // (async () => {
       console.log(`${result.user.displayName} logged in.`);
       window.alert(`Welcome ${result.user.displayName}!`);
-    })
-    .catch(err => {
-      console.log(`Sign in error: ${err.message}`);
-      window.alert(`Sign in failed.`);
-    });
-}
+
+      const modal = M.Modal.getInstance(document.getElementById('roleCourseModal'));
+      modal.open();
+
+    //   const db = firebase.firestore();
+    //   const userRef = db.collection('result.user').doc(user.uid);
+    //   const doc = await userRef.get();
+
+    //   let needsProfile = true;
+
+    //   if (doc.exists) {
+    //     const userData = doc.data();
+    //     const hasRole = userData?.role;
+    //     const hasCourses = Array.isArray(userData?.courses) && userData.courses.length > 0;
+    
+    //     if (hasRole && hasCourses) {
+    //       needsProfile = false;
+    //       if (userData.role === 'Professor') {
+    //         window.location.href = `/professor/${user.uid}`;
+    //         return;
+    //       }
+    //     }
+    //   }
+    
+    //   if (needsProfile) {
+    //     const modal = M.Modal.getInstance(document.getElementById('roleCourseModal'));
+    //     modal.open();
+    
+    //     document.getElementById("submitRoleCourse").onclick = async () => {
+    //       const role = document.getElementById("roleSelect").value;
+    //       const courseElems = document.getElementById("courseSelect").selectedOptions;
+    //       const courses = Array.from(courseElems).map(opt => opt.value);
+    
+    //       if (!role || courses.length === 0) {
+    //         window.alert("Please select a role and at least one course.");
+    //         return;
+    //       }
+    
+    //       await userRef.set({
+    //         name: user.displayName,
+    //         email: user.email,
+    //         role,
+    //         courses,
+    //         timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    //       });
+
+    //       modal.close();
+    //       window.alert("Role and course saved!");
+
+    //       if (role === 'Professor') {
+    //         window.location.href = `/professor/${user.uid}`;
+    //       }
+    //     };
+    //   } else {
+    //     console.log("User already exists in Firestore.");
+    //     const userData = doc.data();
+    //       if (userData.role === 'Professor') {
+    //         window.location.href = `/professor/${user.uid}`; 
+    //       }
+    //   }
+    // })();
+  })
+  .catch(err => {
+    console.log(`Sign in error: ${err.message}`);
+    window.alert(`Sign in failed.`);
+  });
+}   
 
 function signOut() {
   firebase
@@ -144,4 +206,44 @@ async function checkIn() {
     window.alert('User not signed in.');
   }
 }
+
+document.getElementById('submitRoleCourse').addEventListener('click', async () => {
+  const role = document.getElementById('roleSelect').value;
+  const courseId = document.getElementById('courseSelect').value;
+
+  if (!role || !courseId) {
+    window.alert('Please select both a role and course.');
+    return;
+  }
+
+  try {
+    const token = await createIdToken();
+    const user = firebase.auth().currentUser;
+
+    const formData = new URLSearchParams();
+    formData.append('name', user.displayName);
+    formData.append('uid', user.uid);
+    formData.append('role', role);
+    formData.append('courseId', courseId);
+
+    const response = await fetch('/saveProfile', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/x-www-form-urlencoded',
+        'Authorization': `Bearer ${token}`
+      },
+      body: formData.toString()
+    });
+
+    if (response.ok) {
+      console.log('Role and course saved.');
+    } else {
+      throw new Error('Failed to save profile.');
+    }
+  } catch (err) {
+    console.log(`Error saving profile: ${err}`);
+    window.alert('Failed to save role and course.');
+  }
+});
+
 

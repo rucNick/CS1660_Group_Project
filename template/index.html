@@ -24,6 +24,38 @@
   </nav>
 
   <br>
+
+  <div id="roleCourseModal" class="modal">
+    <div class="modal-content">
+      <h4>Choose Role and Course</h4>
+
+      <div class="input-field">
+        <select id="roleSelect">
+          <option value="" disabled selected>Choose your role</option>
+          <option value="Student">Student</option>
+          <option value="Professor">Professor</option>
+        </select>
+      </div>
+
+      <div class="input-field">
+        <select id="courseSelect">
+          <option value="" disabled selected>Choose your course</option>
+          <option value="CS1501">CS1501</option>
+          <option value="CS1502">CS1502</option>
+          <option value="CS1520">CS1520</option>
+          <option value="CS1550">CS1550</option>
+          <option value="CS1555">CS1555</option>
+          <option value="CS1635">CS1635</option>
+          <option value="CS1660">CS1660</option>
+        </select>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <a href="#!" class="modal-close waves-effect waves-green btn" id="submitRoleCourse">Submit</a>
+    </div>
+  </div>
+
+  <br>
   
   <div id="bodyInfo" style="display: flex; justify-content: center; flex-direction: column; align-items: center; height: 100vh;">
     <div class="attendance marker" style="text-align: center;">
@@ -42,6 +74,14 @@
 
     document.getElementById("signInButton").addEventListener("click", function () {
       toggle();
+    });
+
+    document.addEventListener('DOMContentLoaded', function () {
+      var elems = document.querySelectorAll('select');
+      M.FormSelect.init(elems);
+
+      var modalElems = document.querySelectorAll('.modal');
+      M.Modal.init(modalElems);
     });
 
   </script>]
