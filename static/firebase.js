@@ -56,67 +56,70 @@ function signIn() {
   .auth()
   .signInWithPopup(provider)
   .then(result => {
-    (async () => {
+    // (async () => {
       console.log(`${result.user.displayName} logged in.`);
       window.alert(`Welcome ${result.user.displayName}!`);
 
-      const db = firebase.firestore();
-      const userRef = db.collection('result.user').doc(user.uid);
-      const doc = await userRef.get();
+      const modal = M.Modal.getInstance(document.getElementById('roleCourseModal'));
+      modal.open();
 
-      let needsProfile = true;
+    //   const db = firebase.firestore();
+    //   const userRef = db.collection('result.user').doc(user.uid);
+    //   const doc = await userRef.get();
 
-      if (doc.exists) {
-        const userData = doc.data();
-        const hasRole = userData?.role;
-        const hasCourses = Array.isArray(userData?.courses) && userData.courses.length > 0;
-    
-        if (hasRole && hasCourses) {
-          needsProfile = false;
-          if (userData.role === 'Professor') {
-            window.location.href = `/professor/${user.uid}`;
-            return;
-          }
-        }
-      }
-    
-      if (needsProfile) {
-        const modal = M.Modal.getInstance(document.getElementById('roleCourseModal'));
-        modal.open();
-    
-        document.getElementById("submitRoleCourse").onclick = async () => {
-          const role = document.getElementById("roleSelect").value;
-          const courseElems = document.getElementById("courseSelect").selectedOptions;
-          const courses = Array.from(courseElems).map(opt => opt.value);
-    
-          if (!role || courses.length === 0) {
-            window.alert("Please select a role and at least one course.");
-            return;
-          }
-    
-          await userRef.set({
-            name: user.displayName,
-            email: user.email,
-            role,
-            courses,
-            timestamp: firebase.firestore.FieldValue.serverTimestamp()
-          });
+    //   let needsProfile = true;
 
-          modal.close();
-          window.alert("Role and course saved!");
+    //   if (doc.exists) {
+    //     const userData = doc.data();
+    //     const hasRole = userData?.role;
+    //     const hasCourses = Array.isArray(userData?.courses) && userData.courses.length > 0;
+    
+    //     if (hasRole && hasCourses) {
+    //       needsProfile = false;
+    //       if (userData.role === 'Professor') {
+    //         window.location.href = `/professor/${user.uid}`;
+    //         return;
+    //       }
+    //     }
+    //   }
+    
+    //   if (needsProfile) {
+    //     const modal = M.Modal.getInstance(document.getElementById('roleCourseModal'));
+    //     modal.open();
+    
+    //     document.getElementById("submitRoleCourse").onclick = async () => {
+    //       const role = document.getElementById("roleSelect").value;
+    //       const courseElems = document.getElementById("courseSelect").selectedOptions;
+    //       const courses = Array.from(courseElems).map(opt => opt.value);
+    
+    //       if (!role || courses.length === 0) {
+    //         window.alert("Please select a role and at least one course.");
+    //         return;
+    //       }
+    
+    //       await userRef.set({
+    //         name: user.displayName,
+    //         email: user.email,
+    //         role,
+    //         courses,
+    //         timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    //       });
 
-          if (role === 'Professor') {
-            window.location.href = `/professor/${user.uid}`;
-          }
-        };
-      } else {
-        console.log("User already exists in Firestore.");
-        const userData = doc.data();
-          if (userData.role === 'Professor') {
-            window.location.href = `/professor/${user.uid}`; 
-          }
-      }
-    })();
+    //       modal.close();
+    //       window.alert("Role and course saved!");
+
+    //       if (role === 'Professor') {
+    //         window.location.href = `/professor/${user.uid}`;
+    //       }
+    //     };
+    //   } else {
+    //     console.log("User already exists in Firestore.");
+    //     const userData = doc.data();
+    //       if (userData.role === 'Professor') {
+    //         window.location.href = `/professor/${user.uid}`; 
+    //       }
+    //   }
+    // })();
   })
   .catch(err => {
     console.log(`Sign in error: ${err.message}`);
