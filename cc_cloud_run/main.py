@@ -1,4 +1,4 @@
-from fastapi import FastAPI, Form, Request, HTTPException
+from fastapi import FastAPI, Form, Request, HTTPException, Depends
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from google.cloud import firestore
@@ -36,3 +36,8 @@ async def mark_attendance(name: Annotated[str, Form()], uid: Annotated[str, Form
 @app.get("/confirm")
 async def confirm_page(request: Request):
     return templates.TemplateResponse("confirm.html", {"request": request})
+
+@app.get("/professor/{user_id}")
+async def professor_page(request: Request, user_id: str):
+    return templates.TemplateResponse("professor.html", {"request": request, "user_id": user_id})
+
