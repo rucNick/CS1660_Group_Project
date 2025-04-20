@@ -4,7 +4,6 @@ from fastapi.staticfiles import StaticFiles
 from google.cloud import firestore
 from typing import Annotated
 import datetime
-import logging
 
 app = FastAPI()
 
@@ -62,34 +61,22 @@ async def get_role_course(uid: str):
         }
     raise HTTPException(status_code=404, detail="User not found")
 
-logger = logging.getLogger("uvicorn")
-
 @app.get("/professor")
 async def professor_page(request: Request, uid: str):
-    logger.info(f"Fetching professor data for user_id: {uid}")
+    print(f"Fetching professor data for user_id: {uid}")
+    user_ref = db.collection('attendance').document(uid)
+    user_data = user_ref.get().to_dict()
 
-    user_ref = db.collection('attendance').document(uid) 
-    user_doc = user_ref.get()
-    if not user_doc.exists:
-        logger.warning("User document not found.")
-        raise HTTPException(status_code=404, detail="User not found.")
-
-    user_data = user_doc.to_dict()
-
-    if user_data.get('role') != 'Professor':
-        logger.warning("Access denied or user not a professor.")
+    if not user_data or user_data.get('role') != 'Professor':
+        print("Access denied or user not a professor.")
         raise HTTPException(status_code=403, detail="Access forbidden. Not a professor.")
 
     course_id = user_data.get('courseId')
     if not course_id:
-        logger.warning("Professor has no course assigned.")
+        print("Professor has no course assigned.")
         raise HTTPException(status_code=400, detail="No course assigned to this professor.")
-
-    attendance_records = db.collection("attendance") \
-        .where("courseId", "==", course_id) \
-        .order_by("timestamp", direction=firestore.Query.ASCENDING) \
-        .stream()
-
+    
+    attendance_records = attendance_collection.where("courseId", "==", course_id).order_by("timestamp", direction=firestore.Query.ASCENDING).stream()
     attendance_data = [doc.to_dict() for doc in attendance_records]
 
     return templates.TemplateResponse("professor.html", {
@@ -97,7 +84,6 @@ async def professor_page(request: Request, uid: str):
         "attendance_data": attendance_data,
         "course_id": course_id
     })
-
 
 
 

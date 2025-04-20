@@ -138,12 +138,14 @@ async function checkIn() {
       const courseId = params.get("courseId");
       const role = params.get("role");
 
+      const name = user.displayName;
       formData.append('name', name);
+      const uid = user.uid;
       formData.append('uid', uid);
       formData.append('courseId', courseId);
-      formData.append('role', role);
+      formData.append('role', role)
 
-      // Send the POST request to mark attendance
+
       const response = await fetch('/attend', {
         method: 'POST',
         headers: {
@@ -156,13 +158,6 @@ async function checkIn() {
       if (response.ok) {
         window.alert("Attendance marked successfully!");
         showConfirmation(name, Date.now(), courseId);
-
-        if (role === "Professor") {
-          window.location.href = `/professor?uid=${uid}`;
-        }
-      } else {
-        console.log("Error: Failed to mark attendance.");
-        window.alert('Failed to mark attendance. Please try again!');
       }
 
     } catch (err) {
@@ -174,48 +169,48 @@ async function checkIn() {
   }
 }
 
-async function submit() {
-  console.log(`Checking in for...`);
-  if (firebase.auth().currentUser || authDisabled()) {
-    try {
-      const token = await createIdToken();
+// async function submit() {
+//   console.log(`Checking in for...`);
+//   if (firebase.auth().currentUser || authDisabled()) {
+//     try {
+//       const token = await createIdToken();
 
-      const formData = new URLSearchParams();
-      const user = firebase.auth().currentUser;
+//       const formData = new URLSearchParams();
+//       const user = firebase.auth().currentUser;
       
-      const params = new URLSearchParams(window.location.search);
-      const courseId = params.get("courseId");
-      const role = params.get("role");
+//       const params = new URLSearchParams(window.location.search);
+//       const courseId = params.get("courseId");
+//       const role = params.get("role");
 
-      const name = user.displayName;
-      formData.append('name', name);
-      const uid = user.uid;
-      formData.append('uid', uid);
-      formData.append('courseId', courseId);
-      formData.append('role', role)
+//       const name = user.displayName;
+//       formData.append('name', name);
+//       const uid = user.uid;
+//       formData.append('uid', uid);
+//       formData.append('courseId', courseId);
+//       formData.append('role', role)
 
 
-      const response = await fetch('/submit', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/x-www-form-urlencoded',
-          'Authorization': `Bearer ${token}`
-        },
-        body: formData.toString()
-      });
+//       const response = await fetch('/submit', {
+//         method: 'POST',
+//         headers: {
+//           'Content-Type': 'application/x-www-form-urlencoded',
+//           'Authorization': `Bearer ${token}`
+//         },
+//         body: formData.toString()
+//       });
 
-      if (response.ok) {
-        window.alert("successfully!");
-      }
+//       if (response.ok) {
+//         window.alert("successfully!");
+//       }
 
-    } catch (err) {
-      console.log(`Error when submitting: ${err}`);
-      window.alert('Something went wrong... Please try again!');
-    }
-  } else {
-    window.alert('Error');
-  }
-}
+//     } catch (err) {
+//       console.log(`Error when submitting: ${err}`);
+//       window.alert('Something went wrong... Please try again!');
+//     }
+//   } else {
+//     window.alert('Error');
+//   }
+// }
 
 
 
