@@ -218,5 +218,26 @@ async function submit() {
   }
 }
 
+document.getElementById("submitRoleCourse").onclick = async () => {
+  const role = document.getElementById("roleSelect").value;
+  const course = document.getElementById("courseSelect").value;
+
+  if (!role || !course) {
+    window.alert("Please select a role and a course.");
+    return;
+  }
+
+  const url = new URL(window.location.href);
+  url.searchParams.set("courseId", course);
+  url.searchParams.set("role", role);
+  history.replaceState(null, "", url.toString());
+
+  modal.close();
+  window.alert(`Role: ${role}, Course: ${course} selected`);
+
+  await checkIn(); 
+};
+
+
 
 
