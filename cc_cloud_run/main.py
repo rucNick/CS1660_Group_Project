@@ -4,6 +4,7 @@ from fastapi.staticfiles import StaticFiles
 from google.cloud import firestore
 from typing import Annotated
 import datetime
+import logging
 
 app = FastAPI()
 
@@ -61,13 +62,13 @@ async def get_role_course(uid: str):
         }
     raise HTTPException(status_code=404, detail="User not found")
 
+logger = logging.getLogger("uvicorn")
+
 @app.get("/professor")
 async def professor_page(request: Request, user_id: str):
-    print(f"Fetching professor data for user_id: {user_id}")
+    logger.info(f"Fetching professor data for user_id: {user_id}")
     user_ref = db.collection('users').document(user_id)
-    print(f"user_ref {user_ref}")
     user_data = user_ref.get().to_dict()
-    print(f"user_ref {user_data}")
 
     if not user_data or user_data.get('role') != 'Professor':
         print("Access denied or user not a professor.")
