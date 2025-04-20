@@ -40,7 +40,6 @@ async def mark_attendance(name: Annotated[str, Form()], uid: Annotated[str, Form
     attendance_collection.add({
         "name": name,
         "uid": uid,
-        "timestamp": timestamp,
         "courseId": courseId,
         "role": role,
     })
