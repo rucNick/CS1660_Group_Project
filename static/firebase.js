@@ -75,7 +75,7 @@ function signIn() {
         const courseId = data.courseId;
 
         if (role === "Professor") {
-          window.location.href = `/professor`;
+          window.location.href = `/professor?user_id=${uid}`;
           return;
         }
       }
@@ -101,7 +101,7 @@ function signIn() {
         window.alert(`Role: ${role}, Course: ${course} selected`);
 
         if (role === "Professor") {
-          window.location.href = `/professor`;
+          window.location.href = `/professor?user_id=${uid}`;
         }
       };
     })
