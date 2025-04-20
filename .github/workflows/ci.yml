@@ -71,10 +71,24 @@ jobs:
           platforms: linux/amd64,linux/arm64
 
       # build and push the image
-      - name: Build and Push
+      - name: Set short SHA
+        run: echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
+      - name: Build and Push Docker Image
         uses: docker/build-push-action@v6
         with:
           context: ./
           file: ./Dockerfile
           push: true
-          tags: us-central1-docker.pkg.dev/qr-attendance-455219/qr-attendance/app:v1
+          tags: |
+            us-central1-docker.pkg.dev/qr-attendance-455219/qr-attendance/app:${{ env.SHORT_SHA }}
+            us-central1-docker.pkg.dev/qr-attendance-455219/qr-attendance/app:latest
+
+      - name: Deploy to Cloud Run
+        run: |
+          gcloud run deploy qr-attendance \
+            --allow-unauthenticated \
+            --image us-central1-docker.pkg.dev/qr-attendance-455219/qr-attendance/app:${{ env.SHORT_SHA }} \
+            --service-account qr-attendance@qr-attendance-455219.iam.gserviceaccount.com \
+            --region us-central1 \
+            --port 8000
