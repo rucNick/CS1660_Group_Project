@@ -82,7 +82,6 @@ jobs:
           push: true
           tags: |
             us-central1-docker.pkg.dev/qr-attendance-455219/qr-attendance/app:${{ env.SHORT_SHA }}
-            us-central1-docker.pkg.dev/qr-attendance-455219/qr-attendance/app:latest
 
       - name: Deploy to Cloud Run
         run: |
