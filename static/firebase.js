@@ -64,20 +64,36 @@ function signIn() {
       const userRef = db.collection('result.user').doc(user.uid);
       const doc = await userRef.get();
 
-      if (!doc.exists) {
+      let needsProfile = true;
+
+      if (doc.exists) {
+        const userData = doc.data();
+        const hasRole = userData?.role;
+        const hasCourses = Array.isArray(userData?.courses) && userData.courses.length > 0;
+    
+        if (hasRole && hasCourses) {
+          needsProfile = false;
+          if (userData.role === 'Professor') {
+            window.location.href = `/professor/${user.uid}`;
+            return;
+          }
+        }
+      }
+    
+      if (needsProfile) {
         const modal = M.Modal.getInstance(document.getElementById('roleCourseModal'));
         modal.open();
-
+    
         document.getElementById("submitRoleCourse").onclick = async () => {
           const role = document.getElementById("roleSelect").value;
           const courseElems = document.getElementById("courseSelect").selectedOptions;
           const courses = Array.from(courseElems).map(opt => opt.value);
-
+    
           if (!role || courses.length === 0) {
             window.alert("Please select a role and at least one course.");
             return;
           }
-
+    
           await userRef.set({
             name: user.displayName,
             email: user.email,
