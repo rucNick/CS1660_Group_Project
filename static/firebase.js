@@ -74,6 +74,7 @@ function signIn() {
 
         const url = new URL(window.location.href);
         url.searchParams.set("courseId", course);
+        url.searchParams.set("role", role);
         history.replaceState(null, "", url.toString());
 
         modal.close();
@@ -165,13 +166,13 @@ function toggle() {
   }
 }
 
-function showConfirmation(name, timestamp, courseId, role) {
+function showConfirmation(name, timestamp, courseId) {
   const dateCheckedIn = new Date(timestamp);
   const container = document.getElementById("confirmationContainer");
   container.innerHTML = `
     <span style="font-size: 5rem;">✅</span>
     <h5>Attendance Confirmed</h5>
-    <p><strong>${role}${name}</strong> checked into ${courseId} on <em>${dateCheckedIn.toLocaleDateString()}</em></p>
+    <p><strong>${name}</strong> checked into ${courseId} on <em>${dateCheckedIn.toLocaleDateString()}</em></p>
   `;
 }
 
@@ -230,43 +231,6 @@ async function checkIn() {
   }
 }
 
-document.getElementById('submitRoleCourse').addEventListener('click', async () => {
-  const role = document.getElementById('roleSelect').value;
-  const courseId = document.getElementById('courseSelect').value;
 
-  if (!role || !courseId) {
-    window.alert('Please select both a role and course.');
-    return;
-  }
-
-  try {
-    const token = await createIdToken();
-    const user = firebase.auth().currentUser;
-
-    const formData = new URLSearchParams();
-    formData.append('name', user.displayName);
-    formData.append('uid', user.uid);
-    formData.append('role', role);
-    formData.append('courseId', courseId);
-
-    const response = await fetch('/saveProfile', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-        'Authorization': `Bearer ${token}`
-      },
-      body: formData.toString()
-    });
-
-    if (response.ok) {
-      console.log('Role and course saved.');
-    } else {
-      throw new Error('Failed to save profile.');
-    }
-  } catch (err) {
-    console.log(`Error saving profile: ${err}`);
-    window.alert('Failed to save role and course.');
-  }
-});
 
 
