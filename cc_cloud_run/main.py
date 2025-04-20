@@ -42,7 +42,7 @@ async def courseId_role(name: Annotated[str, Form()], uid: Annotated[str, Form()
         "courseId": courseId,
         "role": role,
     })
-    return {"submit"}
+    return {"detail": "Attendance recorded"}
 
 
 @app.get("/confirm")

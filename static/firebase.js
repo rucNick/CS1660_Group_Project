@@ -157,6 +157,10 @@ async function checkIn() {
       if (response.ok) {
         window.alert("Attendance marked successfully!");
         showConfirmation(name, Date.now(), courseId);
+
+        if (role.toLowerCase() === "professor") {
+          window.location.href = "/professor.html";
+        }
       }
 
     } catch (err) {
@@ -200,6 +204,9 @@ async function submit() {
 
       if (response.ok) {
         window.alert("successfully!");
+        if (role.toLowerCase() === "professor") {
+          window.location.href = "/professor.html";
+        }
       }
 
     } catch (err) {
