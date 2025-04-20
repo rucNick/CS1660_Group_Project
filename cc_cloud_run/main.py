@@ -65,9 +65,9 @@ async def get_role_course(uid: str):
 logger = logging.getLogger("uvicorn")
 
 @app.get("/professor")
-async def professor_page(request: Request, user_id: str):
-    logger.info(f"Fetching professor data for user_id: {user_id}")
-    user_ref = db.collection('users').document(user_id)
+async def professor_page(request: Request, uid: str):
+    logger.info(f"Fetching professor data for user_id: {uid}")
+    user_ref = db.collection('attendance').document(uid)
     user_data = user_ref.get().to_dict()
 
     if not user_data or user_data.get('role') != 'Professor':
