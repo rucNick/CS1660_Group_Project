@@ -80,30 +80,38 @@ function signIn() {
         }
       }
 
-      const modal = M.Modal.getInstance(document.getElementById('roleCourseModal'));
-      modal.open();
+      try {
+        const token = await createIdToken();
+        const user = firebase.auth().currentUser;
 
-      document.getElementById("submitRoleCourse").onclick = async () => {
-        const role = document.getElementById("roleSelect").value;
-        const course = document.getElementById("courseSelect").value;
+        const formData = new URLSearchParams();
+        formData.append('name', user.displayName);
+        formData.append('uid', user.uid);
+        formData.append('courseId', course);
+        formData.append('role', role);
 
-        if (!role && !course) {
-          window.alert("Please select a role and a course.");
-          return;
+        const response = await fetch('/submit', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/x-www-form-urlencoded',
+                'Authorization': `Bearer ${token}`
+            },
+            body: formData.toString()
+        });
+
+        if (response.ok) {
+            if (role === "Professor") {
+                window.location.href = `/professor?user_id=${user.uid}`;
+            } else {
+                window.alert("You are registered as a student!");
+            }
+        } else {
+            throw new Error('Submission failed');
         }
-
-        const url = new URL(window.location.href);
-        url.searchParams.set("courseId", course);
-        url.searchParams.set("role", role);
-        history.replaceState(null, "", url.toString());
-
-        modal.close();
-        window.alert(`Role: ${role}, Course: ${course} selected`);
-
-        if (role === "Professor") {
-          window.location.href = `/professor?user_id=${uid}`;
-        }
-      };
+    } catch (err) {
+        console.error(err);
+        window.alert('Failed to submit role/course selection');
+    };
     })
     .catch(err => {
       console.log(`Sign in error: ${err.message}`);
