@@ -63,6 +63,22 @@ function signIn() {
       const modal = M.Modal.getInstance(document.getElementById('roleCourseModal'));
       modal.open();
 
+      document.getElementById("submitRoleCourse").onclick = async () => {
+        const role = document.getElementById("roleSelect").value;
+        const course = document.getElementById("courseSelect").value;
+
+        if (!role || !course) {
+          window.alert("Please select a role and a course.");
+          return;
+        }
+
+        const url = new URL(window.location.href);
+        url.searchParams.set("courseId", course);
+        history.replaceState(null, "", url.toString());
+
+        modal.close();
+        window.alert(`Role: ${role}, Course: ${course} selected`);
+      };
     //   const db = firebase.firestore();
     //   const userRef = db.collection('result.user').doc(user.uid);
     //   const doc = await userRef.get();
@@ -177,6 +193,11 @@ async function checkIn() {
       
       const params = new URLSearchParams(window.location.search);
       const courseId = params.get("courseId");
+
+      if (!courseId) {
+        window.alert("Please select a course first.");
+        return;
+      }
 
       const name = user.displayName;
       formData.append('name', name);
