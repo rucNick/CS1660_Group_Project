@@ -159,7 +159,7 @@ async function checkIn() {
         showConfirmation(name, Date.now(), courseId);
 
         if (role.toLowerCase() === "professor") {
-          window.location.href = "/professor.html";
+          window.location.href = "/confirm.html";
         }
       }
 
@@ -205,7 +205,7 @@ async function submit() {
       if (response.ok) {
         window.alert("successfully!");
         if (role.toLowerCase() === "professor") {
-          window.location.href = "/professor.html";
+          window.location.href = "/confirm.html";
         }
       }
 
