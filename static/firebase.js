@@ -66,7 +66,7 @@ function signIn() {
         const role = document.getElementById("roleSelect").value;
         const course = document.getElementById("courseSelect").value;
 
-        if (!role || !course) {
+        if (!role && !course) {
           window.alert("Please select a role and a course.");
           return;
         }
@@ -137,11 +137,6 @@ async function checkIn() {
       const params = new URLSearchParams(window.location.search);
       const courseId = params.get("courseId");
 
-      if (!courseId) {
-        window.alert("Please select a course first.");
-        return;
-      }
-
       const name = user.displayName;
       formData.append('name', name);
       const uid = user.uid;
@@ -173,6 +168,7 @@ async function checkIn() {
 }
 
 async function submit() {
+  console.log(`Checking in for...`);
   if (firebase.auth().currentUser || authDisabled()) {
     try {
       const token = await createIdToken();
@@ -184,13 +180,13 @@ async function submit() {
       const courseId = params.get("courseId");
       const role = params.get("role");
 
-      if (!courseId) {
-        window.alert("Please select a course first.");
-        return;
-      }
-
+      const name = user.displayName;
+      formData.append('name', name);
+      const uid = user.uid;
+      formData.append('uid', uid);
       formData.append('courseId', courseId);
-      formData.append("role", role);
+      formData.append('role', role)
+
 
       const response = await fetch('/submit', {
         method: 'POST',
@@ -202,16 +198,15 @@ async function submit() {
       });
 
       if (response.ok) {
-        window.alert("Attendance marked successfully!");
-        showConfirmation(name, Date.now(), courseId, role);
+        window.alert("successfully!");
       }
 
     } catch (err) {
-      console.log(`Error when checking in: ${err}`);
+      console.log(`Error when submitting: ${err}`);
       window.alert('Something went wrong... Please try again!');
     }
   } else {
-    window.alert('User not signed in.');
+    window.alert('Error');
   }
 }
 

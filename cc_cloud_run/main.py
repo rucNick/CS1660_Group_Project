@@ -35,12 +35,16 @@ async def mark_attendance(name: Annotated[str, Form()], uid: Annotated[str, Form
     return {"detail": "Attendance recorded", "timestamp": timestamp}
 
 @app.post("/submit")
-async def courseid_role(courseId: Annotated[str, Form()], role: Annotated[str, Form()]):
+async def mark_attendance(name: Annotated[str, Form()], uid: Annotated[str, Form()], courseId: Annotated[str, Form()], role: Annotated[str, Form()]):
+    timestamp = datetime.datetime.utcnow().isoformat()
     attendance_collection.add({
+        "name": name,
+        "uid": uid,
+        "timestamp": timestamp,
         "courseId": courseId,
         "role": role,
     })
-    return {}
+    return {"submit"}
 
 
 @app.get("/confirm")
