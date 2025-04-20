@@ -165,13 +165,13 @@ function toggle() {
   }
 }
 
-function showConfirmation(name, timestamp, courseId) {
+function showConfirmation(name, timestamp, courseId, role) {
   const dateCheckedIn = new Date(timestamp);
   const container = document.getElementById("confirmationContainer");
   container.innerHTML = `
     <span style="font-size: 5rem;">✅</span>
     <h5>Attendance Confirmed</h5>
-    <p><strong>${name}</strong> checked into ${courseId} on <em>${dateCheckedIn.toLocaleDateString()}</em></p>
+    <p><strong>${role}${name}</strong> checked into ${courseId} on <em>${dateCheckedIn.toLocaleDateString()}</em></p>
   `;
 }
 
@@ -218,7 +218,7 @@ async function checkIn() {
 
       if (response.ok) {
         window.alert("Attendance marked successfully!");
-        showConfirmation(name, Date.now(), courseId);
+        showConfirmation(name, Date.now(), courseId, role);
       }
 
     } catch (err) {
