@@ -41,5 +41,21 @@ async def confirm_page(request: Request):
 
 @app.get("/professor/{user_id}")
 async def professor_page(request: Request, user_id: str):
-    return templates.TemplateResponse("professor.html", {"request": request, "user_id": user_id})
+    user_ref = db.collection('users').document(user_id)
+    user_data = user_ref.get().to_dict()
+
+    if not user_data or user_data.get('role') != 'Professor':
+        raise HTTPException(status_code=403, detail="Access forbidden. Not a professor.")
+
+    course_id = user_data.get('courseId')
+    
+    attendance_records = attendance_collection.where("courseId", "==", course_id).order_by("timestamp", direction=firestore.Query.ASCENDING).stream()
+    attendance_data = [doc.to_dict() for doc in attendance_records]
+
+    return templates.TemplateResponse("professor.html", {
+        "request": request,
+        "attendance_data": attendance_data,
+        "course_id": course_id
+    })
+
 
