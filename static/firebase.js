@@ -136,7 +136,7 @@ async function checkIn() {
       
       const params = new URLSearchParams(window.location.search);
       const courseId = params.get("courseId");
-      const role = params.get("courseId");
+      const role = params.get("role");
 
       const name = user.displayName;
       formData.append('name', name);
