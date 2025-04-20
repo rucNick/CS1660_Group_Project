@@ -99,6 +99,10 @@ function signIn() {
 
         modal.close();
         window.alert(`Role: ${role}, Course: ${course} selected`);
+
+        if (role === "Professor") {
+          window.location.href = `/professor?user_id=${uid}`;
+        }
       };
     })
     .catch(err => {
