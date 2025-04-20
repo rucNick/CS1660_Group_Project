@@ -9,6 +9,8 @@ This is a QR attendance app, using the cloud run and CI/CD assignments as a jump
 ## Service Description
 Professors can use a QRcode that contains a link with a unique class ID tag pinned on the app's url. The student or professor can then scan the QR code and be taken to the landing page for that class. They can sign in and either check in as a student, or view the attendance record as the professor. 
 
+The app is deployed on Cloud Run, and performs auth and data storage through GCP as well.
+
 ## Architectural Diagram
 
 ## Next Steps
