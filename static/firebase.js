@@ -53,11 +53,32 @@ function signIn() {
   provider.addScope('https://www.googleapis.com/auth/userinfo.email');
 
   firebase
-  .auth()
-  .signInWithPopup(provider)
-  .then(result => {
+    .auth()
+    .signInWithPopup(provider)
+    .then(async result => {
       console.log(`${result.user.displayName} logged in.`);
       window.alert(`Welcome ${result.user.displayName}!`);
+
+      const token = await createIdToken();
+      const uid = result.user.uid;
+
+      const res = await fetch(`/getRoleCourse?uid=${uid}`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`
+        }
+      });
+
+      if (res.ok) {
+        const data = await res.json();
+        const role = data.role;
+        const courseId = data.courseId;
+
+        if (role === "Professor") {
+          window.location.href = `/professor?user_id=${uid}`;
+          return;
+        }
+      }
 
       const modal = M.Modal.getInstance(document.getElementById('roleCourseModal'));
       modal.open();
@@ -79,12 +100,12 @@ function signIn() {
         modal.close();
         window.alert(`Role: ${role}, Course: ${course} selected`);
       };
-  })
-  .catch(err => {
-    console.log(`Sign in error: ${err.message}`);
-    window.alert(`Sign in failed.`);
-  });
-}   
+    })
+    .catch(err => {
+      console.log(`Sign in error: ${err.message}`);
+      window.alert(`Sign in failed.`);
+    });
+}
 
 function signOut() {
   firebase
@@ -157,10 +178,6 @@ async function checkIn() {
       if (response.ok) {
         window.alert("Attendance marked successfully!");
         showConfirmation(name, Date.now(), courseId);
-
-        if (role.toLowerCase() === "professor") {
-          window.location.href = "/confirm.html";
-        }
       }
 
     } catch (err) {
@@ -204,9 +221,6 @@ async function submit() {
 
       if (response.ok) {
         window.alert("successfully!");
-        if (role.toLowerCase() === "professor") {
-          window.location.href = "/confirm.html";
-        }
       }
 
     } catch (err) {
@@ -217,26 +231,6 @@ async function submit() {
     window.alert('Error');
   }
 }
-
-document.getElementById("submitRoleCourse").onclick = async () => {
-  const role = document.getElementById("roleSelect").value;
-  const course = document.getElementById("courseSelect").value;
-
-  if (!role || !course) {
-    window.alert("Please select a role and a course.");
-    return;
-  }
-
-  const url = new URL(window.location.href);
-  url.searchParams.set("courseId", course);
-  url.searchParams.set("role", role);
-  history.replaceState(null, "", url.toString());
-
-  modal.close();
-  window.alert(`Role: ${role}, Course: ${course} selected`);
-
-  await checkIn(); 
-};
 
 
 

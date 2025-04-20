@@ -49,6 +49,17 @@ async def courseId_role(name: Annotated[str, Form()], uid: Annotated[str, Form()
 async def confirm_page(request: Request):
     return templates.TemplateResponse("confirm.html", {"request": request})
 
+@app.get("/getRoleCourse")
+async def get_role_course(uid: str):
+    user_ref = db.collection('users').document(uid)
+    user_doc = user_ref.get()
+    if user_doc.exists:
+        user_data = user_doc.to_dict()
+        return {
+            "role": user_data.get("role"),
+            "courseId": user_data.get("courseId")
+        }
+    raise HTTPException(status_code=404, detail="User not found")
 
 @app.get("/professor")
 async def professor_page(request: Request, user_id: str):
@@ -70,5 +81,7 @@ async def professor_page(request: Request, user_id: str):
         "attendance_data": attendance_data,
         "course_id": course_id
     })
+
+
 
 
