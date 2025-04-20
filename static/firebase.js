@@ -53,32 +53,11 @@ function signIn() {
   provider.addScope('https://www.googleapis.com/auth/userinfo.email');
 
   firebase
-    .auth()
-    .signInWithPopup(provider)
-    .then(async result => {
+  .auth()
+  .signInWithPopup(provider)
+  .then(result => {
       console.log(`${result.user.displayName} logged in.`);
       window.alert(`Welcome ${result.user.displayName}!`);
-
-      const token = await createIdToken();
-      const uid = result.user.uid;
-
-      const res = await fetch(`/getRoleCourse?uid=${uid}`, {
-        method: 'GET',
-        headers: {
-          'Authorization': `Bearer ${token}`
-        }
-      });
-
-      if (res.ok) {
-        const data = await res.json();
-        const role = data.role;
-        const courseId = data.courseId;
-
-        if (role === "Professor") {
-          window.location.href = `/professor?user_id=${uid}`;
-          return;
-        }
-      }
 
       const modal = M.Modal.getInstance(document.getElementById('roleCourseModal'));
       modal.open();
@@ -99,17 +78,13 @@ function signIn() {
 
         modal.close();
         window.alert(`Role: ${role}, Course: ${course} selected`);
-
-        if (role === "Professor") {
-          window.location.href = `/professor?user_id=${uid}`;
-        }
       };
-    })
-    .catch(err => {
-      console.log(`Sign in error: ${err.message}`);
-      window.alert(`Sign in failed.`);
-    });
-}
+  })
+  .catch(err => {
+    console.log(`Sign in error: ${err.message}`);
+    window.alert(`Sign in failed.`);
+  });
+}   
 
 function signOut() {
   firebase
@@ -163,13 +138,12 @@ async function checkIn() {
       const courseId = params.get("courseId");
       const role = params.get("role");
 
-      const name = user.displayName;
       formData.append('name', name);
-      const uid = user.uid;
       formData.append('uid', uid);
       formData.append('courseId', courseId);
-      formData.append("role", role)
+      formData.append('role', role);
 
+      // Send the POST request to mark attendance
       const response = await fetch('/attend', {
         method: 'POST',
         headers: {
@@ -182,6 +156,13 @@ async function checkIn() {
       if (response.ok) {
         window.alert("Attendance marked successfully!");
         showConfirmation(name, Date.now(), courseId);
+
+        if (role === "Professor") {
+          window.location.href = `/professor?uid=${uid}`;
+        }
+      } else {
+        console.log("Error: Failed to mark attendance.");
+        window.alert('Failed to mark attendance. Please try again!');
       }
 
     } catch (err) {
@@ -235,7 +216,6 @@ async function submit() {
     window.alert('Error');
   }
 }
-
 
 
 
