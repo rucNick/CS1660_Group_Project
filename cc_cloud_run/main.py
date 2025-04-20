@@ -50,7 +50,7 @@ async def confirm_page(request: Request):
     return templates.TemplateResponse("confirm.html", {"request": request})
 
 
-@app.get("/professor/{user_id}")
+@app.get("/professor")
 async def professor_page(request: Request, user_id: str):
     print(f"Fetching professor data for user_id: {user_id}")
     user_ref = db.collection('users').document(user_id)
