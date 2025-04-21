@@ -19,6 +19,7 @@ function initApp() {
 
       const urlParams = new URLSearchParams(window.location.search);
       const role = urlParams.get('role');
+      const courseId = params.get("courseId");
 
       if (role === 'Professor') {
         checkInButton.style.display = 'none';
@@ -254,6 +255,11 @@ async function addAttendance(courseId) {
 
       if (!userName) {
         window.alert('User not signed in properly.');
+        return;
+      }
+
+      if (!courseId) {
+        window.alert('Course ID is required.');
         return;
       }
 
