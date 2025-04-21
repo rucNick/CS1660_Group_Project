@@ -195,8 +195,7 @@ async function addAttendance(courseId) {
     try {
       const token = await createIdToken();
       
-      const formData = new URLSearchParams();
-      const user = firebase.auth().currentUser;
+      const userName = firebase.auth().currentUser.displayName;
 
       if (!userName) {
         window.alert('User not signed in properly.');
@@ -208,15 +207,11 @@ async function addAttendance(courseId) {
         return;
       }
 
-      const name = user.displayName;
-      formData.append('name', name);
-      const uid = user.uid;
-      formData.append('uid', uid);
-      formData.append('courseId', courseId);
-      formData.append("role", role);
-;  
-      const response = await fetch("/attend", {
-        method: "GET",
+      const formData = new URLSearchParams();
+      formData.append("name", userName); 
+      formData.append("courseId", courseId);  
+      const response = await fetch("/attendance", {
+        method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
           "Authorization": `Bearer ${token}`
