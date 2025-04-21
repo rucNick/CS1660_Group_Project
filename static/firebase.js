@@ -461,20 +461,27 @@ function renderProfessorAttendance(attendanceList) {
 }
 
 
-function renderRoleUI(role) {
+async function renderRoleUI(role) {
   const checkInButton = document.getElementById("checkIn");
   const viewAttendanceButton = document.getElementById("viewAttendance");
 
   if (role === "Professor") {
-    checkInButton.style.display = "none"; 
+    checkInButton.style.display = "none";
     viewAttendanceButton.style.display = "block";
-    const data = await response.json();
-    renderProfessorAttendance(data.attendance); 
+
+    try {
+      const response = await fetch("attend");
+      const data = await response.json();
+      renderProfessorAttendance(data.attendance);
+    } catch (error) {
+      console.error("Failed to fetch attendance:", error);
+    }
   } else if (role === "Student") {
-    checkInButton.style.display = "block"; 
-    viewAttendanceButton.style.display = "none"; 
+    checkInButton.style.display = "block";
+    viewAttendanceButton.style.display = "none";
   }
 }
+
 
 
 

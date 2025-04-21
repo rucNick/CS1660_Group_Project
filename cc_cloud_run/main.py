@@ -32,76 +32,76 @@ async def mark_attendance(name: Annotated[str, Form()], uid: Annotated[str, Form
         "courseId": courseId,
         "role": role,
     })
-    # if role.lower() == "professor":
-    #     all_attendance_query = attendance_collection.where("courseId", "==", courseId).stream()
-    #     all_attendance = []
+    if role.lower() == "professor":
+        all_attendance_query = attendance_collection.where("courseId", "==", courseId).stream()
+        all_attendance = []
 
-    #     for record in all_attendance_query:
-    #         data = record.to_dict()
-    #         all_attendance.append({
-    #             "name": data.get("name"),
-    #             "timestamp": data.get("timestamp"),
-    #             "uid": data.get("uid")
-    #         })
+        for record in all_attendance_query:
+            data = record.to_dict()
+            all_attendance.append({
+                "name": data.get("name"),
+                "timestamp": data.get("timestamp"),
+                "uid": data.get("uid")
+            })
 
-    #     return {
-    #         "detail": "Attendance recorded for professor",
-    #         "timestamp": timestamp,
-    #         "attendance": all_attendance
-    #     }
+        return {
+            "detail": "Attendance recorded for professor",
+            "timestamp": timestamp,
+            "attendance": all_attendance
+        }
     
     return {"detail": "Attendance recorded", "timestamp": timestamp}
 
-@app.post("/submit")
-async def courseId_role(name: Annotated[str, Form()], uid: Annotated[str, Form()], courseId: Annotated[str, Form()], role: Annotated[str, Form()]):
-    attendance_collection.add({
-        "name": name,
-        "uid": uid,
-        "courseId": courseId,
-        "role": role,
-    })
-    return {"message": "Submit success"}
+# @app.post("/submit")
+# async def courseId_role(name: Annotated[str, Form()], uid: Annotated[str, Form()], courseId: Annotated[str, Form()], role: Annotated[str, Form()]):
+#     attendance_collection.add({
+#         "name": name,
+#         "uid": uid,
+#         "courseId": courseId,
+#         "role": role,
+#     })
+#     return {"message": "Submit success"}
 
 
 @app.get("/confirm")
 async def confirm_page(request: Request):
     return templates.TemplateResponse("confirm.html", {"request": request})
 
-@app.get("/getRoleCourse")
-async def get_role_course(uid: str):
-    user_ref = db.collection('users').document(uid)
-    user_doc = user_ref.get()
-    if user_doc.exists:
-        user_data = user_doc.to_dict()
-        return {
-            "role": user_data.get("role"),
-            "courseId": user_data.get("courseId")
-        }
-    raise HTTPException(status_code=404, detail="User not found")
+# @app.get("/getRoleCourse")
+# async def get_role_course(uid: str):
+#     user_ref = db.collection('users').document(uid)
+#     user_doc = user_ref.get()
+#     if user_doc.exists:
+#         user_data = user_doc.to_dict()
+#         return {
+#             "role": user_data.get("role"),
+#             "courseId": user_data.get("courseId")
+#         }
+#     raise HTTPException(status_code=404, detail="User not found")
 
-@app.get("/professor")
-async def professor_page(request: Request, uid: str):
-    print(f"Fetching professor data for user_id: {uid}")
-    user_ref = db.collection('attendance').document(uid)
-    user_data = user_ref.get().to_dict()
+# @app.get("/professor")
+# async def professor_page(request: Request, uid: str):
+#     print(f"Fetching professor data for user_id: {uid}")
+#     user_ref = db.collection('attendance').document(uid)
+#     user_data = user_ref.get().to_dict()
 
-    if not user_data or user_data.get('role') != 'Professor':
-        print("Access denied or user not a professor.")
-        raise HTTPException(status_code=403, detail="Access forbidden. Not a professor.")
+#     if not user_data or user_data.get('role') != 'Professor':
+#         print("Access denied or user not a professor.")
+#         raise HTTPException(status_code=403, detail="Access forbidden. Not a professor.")
 
-    course_id = user_data.get('courseId')
-    if not course_id:
-        print("Professor has no course assigned.")
-        raise HTTPException(status_code=400, detail="No course assigned to this professor.")
+#     course_id = user_data.get('courseId')
+#     if not course_id:
+#         print("Professor has no course assigned.")
+#         raise HTTPException(status_code=400, detail="No course assigned to this professor.")
     
-    attendance_records = attendance_collection.where("courseId", "==", course_id).order_by("timestamp", direction=firestore.Query.ASCENDING).stream()
-    attendance_data = [doc.to_dict() for doc in attendance_records]
+#     attendance_records = attendance_collection.where("courseId", "==", course_id).order_by("timestamp", direction=firestore.Query.ASCENDING).stream()
+#     attendance_data = [doc.to_dict() for doc in attendance_records]
 
-    return templates.TemplateResponse("professor.html", {
-        "request": request,
-        "attendance_data": attendance_data,
-        "course_id": course_id
-    })
+#     return templates.TemplateResponse("professor.html", {
+#         "request": request,
+#         "attendance_data": attendance_data,
+#         "course_id": course_id
+#     })
 
 
 
