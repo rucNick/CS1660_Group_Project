@@ -24,7 +24,9 @@ function initApp() {
       if (role === 'Professor') {
         checkInButton.style.display = 'none';
         viewAttendanceButton.style.display = 'block';
-        addAttendance(courseId);
+        viewAttendanceButton.addEventListener("click", function () {
+          viewAttendance(courseId);
+        });
       } else if (role === 'Student') {
         viewAttendanceButton.style.display = 'none';
         checkInButton.style.display = 'block';
@@ -190,44 +192,34 @@ async function checkIn() {
   }
 }
 
-async function addAttendance(courseId) {
+async function viewAttendance(courseId) {
   if (firebase.auth().currentUser || authDisabled()) {
     try {
       const token = await createIdToken();
-      
-      const userName = firebase.auth().currentUser.displayName;
-
-      if (!userName) {
-        window.alert('User not signed in properly.');
-        return;
-      }
 
       if (!courseId) {
         window.alert('Course ID is required.');
         return;
       }
 
-      const formData = new URLSearchParams();
-      formData.append("name", userName); 
-      formData.append("courseId", courseId);  
-      const response = await fetch("/attendance", {
-        method: "POST",
+      const role = 'Professor'; 
+
+      const response = await fetch(`https://qr-attendance-1043677821736.us-central1.run.app/?courseId=${courseId}&role=${role}`, {
+        method: "GET",
         headers: {
-          "Content-Type": "application/x-www-form-urlencoded",
           "Authorization": `Bearer ${token}`
-        },
-        body: formData.toString()
+        }
       });
 
       if (response.ok) {
-        const data = await response.json();
-        window.alert(`Attendance for ${data.name} successfully recorded.`);
+        const html = await response.text();
+        document.getElementById("attendance-container").innerHTML = html;
       } else {
         const errorData = await response.json();
         window.alert(`Failed! ${errorData.error}`);
       }
     } catch (err) {
-      console.log(`Error when submitting attendance: ${err}`);
+      console.log(`Error when viewing attendance: ${err}`);
       window.alert('Something went wrong... Please try again!');
     }
   } else {
