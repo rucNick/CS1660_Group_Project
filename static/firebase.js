@@ -195,7 +195,8 @@ async function addAttendance(courseId, role) {
     try {
       const token = await createIdToken();
       
-      const userName = firebase.auth().currentUser.displayName;
+      const formData = new URLSearchParams();
+      const user = firebase.auth().currentUser;
 
       if (!userName) {
         window.alert('User not signed in properly.');
@@ -206,8 +207,6 @@ async function addAttendance(courseId, role) {
         window.alert('Course ID is required.');
         return;
       }
-
-      const user = firebase.auth().currentUser;
 
       const name = user.displayName;
       formData.append('name', name);
