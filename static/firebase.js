@@ -19,7 +19,7 @@ function initApp() {
 
       const urlParams = new URLSearchParams(window.location.search);
       const role = urlParams.get('role');
-      const courseId = params.get("courseId");
+      const courseId = urlParams.get("courseId");
 
       if (role === 'Professor') {
         checkInButton.style.display = 'none';
