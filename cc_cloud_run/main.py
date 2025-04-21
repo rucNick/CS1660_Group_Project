@@ -42,7 +42,10 @@ async def confirm_page(request: Request):
 
 
 @app.get("/attendance")
-async def show_attendance_page(request: Request, courseId: str):
+async def show_attendance_page(request: Request, courseId: str, user_role: str):
+    if user_role != "professor":
+        raise HTTPException(status_code=403, detail="Permission denied")
+    
     records = attendance_collection.where("courseId", "==", courseId).stream()
     attendance_data = []
 
@@ -59,17 +62,17 @@ async def show_attendance_page(request: Request, courseId: str):
     })
 
 
-@app.post("/attendance")
-async def add_attendance(name: Annotated[str, Form()], courseId: Annotated[str, Form()]):
-    if not name or not courseId:
-        raise HTTPException(status_code=400, detail="Missing user name or course ID")
+# @app.post("/attendance")
+# async def add_attendance(name: Annotated[str, Form()], courseId: Annotated[str, Form()]):
+#     if not name or not courseId:
+#         raise HTTPException(status_code=400, detail="Missing user name or course ID")
 
-    attendance_collection.add({
-        "name": name,
-        "courseId": courseId,
-        "timestamp": datetime.datetime.utcnow().isoformat()
-    })
+#     attendance_collection.add({
+#         "name": name,
+#         "courseId": courseId,
+#         "timestamp": datetime.datetime.utcnow().isoformat()
+#     })
     
-    return {"message": "Attendance recorded", "name": name}
+#     return {"message": "Attendance recorded", "name": name}
 
 
