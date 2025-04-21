@@ -276,7 +276,6 @@ async function addAttendance(courseId) {
       if (response.ok) {
         const data = await response.json();
         window.alert(`Attendance for ${data.name} successfully recorded.`);
-        window.location.reload();
       } else {
         const errorData = await response.json();
         window.alert(`Failed! ${errorData.error}`);
