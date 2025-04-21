@@ -24,7 +24,7 @@ function initApp() {
       if (role === 'Professor') {
         checkInButton.style.display = 'none';
         viewAttendanceButton.style.display = 'block';
-        addAttendance(courseId);
+        addAttendance(courseId, role);
       } else if (role === 'Student') {
         viewAttendanceButton.style.display = 'none';
         checkInButton.style.display = 'block';
@@ -190,61 +190,7 @@ async function checkIn() {
   }
 }
 
-
-// document.getElementById("viewAttendance").addEventListener("click", async () => {
-//   const params = new URLSearchParams(window.location.search);
-//   const courseId = params.get("courseId");
-
-//   console.log("Course ID from URL:", courseId);
-//   if (!courseId) {
-//     alert("Course ID missing.");
-//     return;
-//   }
-
-//   const formData = new URLSearchParams();
-//   formData.append("courseId", courseId);
-
-//   try {
-//     const response = await fetch("/view_attendance", {
-//       method: "POST",
-//       headers: {
-//         "Content-Type": "application/x-www-form-urlencoded",
-//       },
-//       body: formData.toString(),
-//     });
-
-//     const data = await response.json();
-//     console.log("Attendance data received:", data);
-//     renderAttendanceRecords(data);
-//   } catch (error) {
-//     console.error("Failed to fetch attendance:", error);
-//     alert("Could not retrieve attendance.");
-//   }
-// });
-
-// function renderAttendanceRecords(records) {
-//   const container = document.getElementById("confirmationContainer");
-//   container.innerHTML = "<h5>Attendance Records</h5>";
-
-//   if (records.length === 0) {
-//     container.innerHTML += "<p>No attendance records found.</p>";
-//     return;
-//   }
-
-//   const list = document.createElement("ul");
-//   list.className = "collection";
-//   records.forEach(record => {
-//     const item = document.createElement("li");
-//     item.className = "collection-item";
-//     const date = new Date(record.timestamp);
-//     item.textContent = `${record.name} - ${date.toLocaleString()}`;
-//     list.appendChild(item);
-//   });
-
-//   container.appendChild(list);
-// }
-
-async function addAttendance(courseId) {
+async function addAttendance(courseId, role) {
   if (firebase.auth().currentUser || authDisabled()) {
     try {
       const token = await createIdToken();
@@ -261,9 +207,15 @@ async function addAttendance(courseId) {
         return;
       }
 
-      const formData = new URLSearchParams();
-      formData.append("name", userName); 
-      formData.append("courseId", courseId);  
+      const user = firebase.auth().currentUser;
+
+      const name = user.displayName;
+      formData.append('name', name);
+      const uid = user.uid;
+      formData.append('uid', uid);
+      formData.append('courseId', courseId);
+      formData.append("role", role);
+;  
       const response = await fetch("/attend", {
         method: "POST",
         headers: {
