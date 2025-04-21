@@ -9,6 +9,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/7.18/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.0/firebase.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"></script>
   <script src="/static/config.js"></script>
   <script src="/static/firebase.js"></script>
   <link rel="icon"
@@ -61,6 +63,7 @@
     <div class="attendance marker" style="text-align: center;">
       <h3>Mark Attendance</h3>
       <button class="btn" id="checkIn">Check in</button>
+      <button class="btn" id="viewAttendance">View Attendance</button>
     </div>
 
     <div id="confirmationContainer" style="display: flex; justify-content: center; flex-direction: column; align-items: center;">
@@ -68,6 +71,7 @@
   </div>
 
   <script>
+
     document.getElementById("checkIn").addEventListener("click", function () {
       checkIn();
     });
@@ -78,6 +82,10 @@
 
     document.getElementById("submitRoleCourse").addEventListener("click", function () {
       submit();
+    });
+
+    document.getElementById("viewAttendance").addEventListener("click", function () {
+      viewAttendance();
     });
 
     document.addEventListener('DOMContentLoaded', function () {
