@@ -204,7 +204,7 @@ async function viewAttendance(courseId) {
 
       const role = 'Professor'; 
 
-      const response = await fetch('/attend', {
+      const response = await fetch(`/attend?courseId=${courseId}&user_role=${role}`, {
         method: "GET",
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',

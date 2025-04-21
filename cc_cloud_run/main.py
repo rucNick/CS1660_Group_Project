@@ -43,7 +43,7 @@ async def confirm_page(request: Request):
 
 @app.get("/attend")
 async def show_attendance_page(request: Request, courseId: str, user_role: str):
-    if user_role != "professor":
+    if user_role != "Professor":
         raise HTTPException(status_code=403, detail="Permission denied")
     
     records = attendance_collection.where("courseId", "==", courseId).stream()
