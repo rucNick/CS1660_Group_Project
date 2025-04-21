@@ -23,6 +23,7 @@ function initApp() {
       if (role === 'Professor') {
         checkInButton.style.display = 'none';
         viewAttendanceButton.style.display = 'block';
+        addAttendance(courseId);
       } else if (role === 'Student') {
         viewAttendanceButton.style.display = 'none';
         checkInButton.style.display = 'block';
@@ -189,57 +190,100 @@ async function checkIn() {
 }
 
 
-document.getElementById("viewAttendance").addEventListener("click", async () => {
-  const params = new URLSearchParams(window.location.search);
-  const courseId = params.get("courseId");
+// document.getElementById("viewAttendance").addEventListener("click", async () => {
+//   const params = new URLSearchParams(window.location.search);
+//   const courseId = params.get("courseId");
 
-  console.log("Course ID from URL:", courseId);
-  if (!courseId) {
-    alert("Course ID missing.");
-    return;
+//   console.log("Course ID from URL:", courseId);
+//   if (!courseId) {
+//     alert("Course ID missing.");
+//     return;
+//   }
+
+//   const formData = new URLSearchParams();
+//   formData.append("courseId", courseId);
+
+//   try {
+//     const response = await fetch("/view_attendance", {
+//       method: "POST",
+//       headers: {
+//         "Content-Type": "application/x-www-form-urlencoded",
+//       },
+//       body: formData.toString(),
+//     });
+
+//     const data = await response.json();
+//     console.log("Attendance data received:", data);
+//     renderAttendanceRecords(data);
+//   } catch (error) {
+//     console.error("Failed to fetch attendance:", error);
+//     alert("Could not retrieve attendance.");
+//   }
+// });
+
+// function renderAttendanceRecords(records) {
+//   const container = document.getElementById("confirmationContainer");
+//   container.innerHTML = "<h5>Attendance Records</h5>";
+
+//   if (records.length === 0) {
+//     container.innerHTML += "<p>No attendance records found.</p>";
+//     return;
+//   }
+
+//   const list = document.createElement("ul");
+//   list.className = "collection";
+//   records.forEach(record => {
+//     const item = document.createElement("li");
+//     item.className = "collection-item";
+//     const date = new Date(record.timestamp);
+//     item.textContent = `${record.name} - ${date.toLocaleString()}`;
+//     list.appendChild(item);
+//   });
+
+//   container.appendChild(list);
+// }
+
+async function addAttendance(courseId) {
+  console.log(`Submitting attendance for course ${courseId}...`);
+
+  if (firebase.auth().currentUser || authDisabled()) {
+    try {
+      const token = await createIdToken();
+      
+      const userName = firebase.auth().currentUser.displayName;
+
+      if (!userName) {
+        window.alert('User not signed in properly.');
+        return;
+      }
+
+      const formData = new URLSearchParams();
+      formData.append("name", userName); 
+      formData.append("courseId", courseId);  
+      const response = await fetch("/attendance", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/x-www-form-urlencoded",
+          "Authorization": `Bearer ${token}`
+        },
+        body: formData.toString()
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        window.alert(`Attendance for ${data.name} successfully recorded.`);
+        window.location.reload();
+      } else {
+        const errorData = await response.json();
+        window.alert(`Failed! ${errorData.error}`);
+      }
+    } catch (err) {
+      console.log(`Error when submitting attendance: ${err}`);
+      window.alert('Something went wrong... Please try again!');
+    }
+  } else {
+    window.alert('User not signed in.');
   }
-
-  const formData = new URLSearchParams();
-  formData.append("courseId", courseId);
-
-  try {
-    const response = await fetch("/view_attendance", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/x-www-form-urlencoded",
-      },
-      body: formData.toString(),
-    });
-
-    const data = await response.json();
-    console.log("Attendance data received:", data);
-    renderAttendanceRecords(data);
-  } catch (error) {
-    console.error("Failed to fetch attendance:", error);
-    alert("Could not retrieve attendance.");
-  }
-});
-
-function renderAttendanceRecords(records) {
-  const container = document.getElementById("confirmationContainer");
-  container.innerHTML = "<h5>Attendance Records</h5>";
-
-  if (records.length === 0) {
-    container.innerHTML += "<p>No attendance records found.</p>";
-    return;
-  }
-
-  const list = document.createElement("ul");
-  list.className = "collection";
-  records.forEach(record => {
-    const item = document.createElement("li");
-    item.className = "collection-item";
-    const date = new Date(record.timestamp);
-    item.textContent = `${record.name} - ${date.toLocaleString()}`;
-    list.appendChild(item);
-  });
-
-  container.appendChild(list);
 }
 
 
