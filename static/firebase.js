@@ -245,8 +245,6 @@ async function checkIn() {
 // }
 
 async function addAttendance(courseId) {
-  console.log(`Submitting attendance for course ${courseId}...`);
-
   if (firebase.auth().currentUser || authDisabled()) {
     try {
       const token = await createIdToken();
