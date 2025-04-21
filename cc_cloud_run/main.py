@@ -24,23 +24,7 @@ async def read_root(request: Request):
     })
 
 @app.post("/attend")
-async def mark_attendance(request: Request, name: Annotated[str, Form()], uid: Annotated[str, Form()], courseId: Annotated[str, Form()], role: Annotated[str, Form()]):
-    if role.lower() == "professor":
-        records = attendance_collection.where("courseId", "==", courseId).stream()
-        attendance_data = []
-
-        for r in records:
-            data = r.to_dict()
-            attendance_data.append({
-                "name": data.get("name"),
-                "timestamp": data.get("timestamp")
-            })
-
-        return templates.TemplateResponse("index.html", {
-            "request": request,
-            "attendance_data": attendance_data
-        })
-    
+async def mark_attendance(name: Annotated[str, Form()], uid: Annotated[str, Form()], courseId: Annotated[str, Form()], role: Annotated[str, Form()]):    
     timestamp = datetime.datetime.utcnow().isoformat()
     attendance_collection.add({
         "name": name,
@@ -69,10 +53,10 @@ async def show_attendance_page(request: Request, courseId: str):
             "timestamp": data.get("timestamp")
         })
 
-    return templates.TemplateResponse("index.html", {
+    return {templates.TemplateResponse("index.html", {
         "request": request,
         "attendance_records": attendance_data
-    })
+    })}
 
 
 

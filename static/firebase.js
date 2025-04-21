@@ -24,7 +24,7 @@ function initApp() {
       if (role === 'Professor') {
         checkInButton.style.display = 'none';
         viewAttendanceButton.style.display = 'block';
-        addAttendance(courseId, role);
+        addAttendance(courseId);
       } else if (role === 'Student') {
         viewAttendanceButton.style.display = 'none';
         checkInButton.style.display = 'block';
@@ -190,7 +190,7 @@ async function checkIn() {
   }
 }
 
-async function addAttendance(courseId, role) {
+async function addAttendance(courseId) {
   if (firebase.auth().currentUser || authDisabled()) {
     try {
       const token = await createIdToken();
@@ -216,7 +216,7 @@ async function addAttendance(courseId, role) {
       formData.append("role", role);
 ;  
       const response = await fetch("/attend", {
-        method: "POST",
+        method: "GET",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
           "Authorization": `Bearer ${token}`
