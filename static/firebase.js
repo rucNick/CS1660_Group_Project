@@ -21,11 +21,9 @@ function initApp() {
       const role = urlParams.get('role');
 
       if (role === 'Professor') {
-        // Hide Check-in button and show View Attendance button for Professor
         checkInButton.style.display = 'none';
         viewAttendanceButton.style.display = 'block';
       } else if (role === 'Student') {
-        // Hide View Attendance button and show Check-in button for Student
         viewAttendanceButton.style.display = 'none';
         checkInButton.style.display = 'block';
       }
@@ -191,5 +189,55 @@ async function checkIn() {
 }
 
 
+document.getElementById("viewAttendance").addEventListener("click", async () => {
+  const params = new URLSearchParams(window.location.search);
+  const courseId = params.get("courseId");
+
+  if (!courseId) {
+    window.alert("Course ID missing.");
+    return;
+  }
+
+  const formData = new URLSearchParams();
+  formData.append("courseId", courseId);
+
+  try {
+    const response = await fetch("/view_attendance", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
+      },
+      body: formData.toString(),
+    });
+
+    const data = await response.json();
+    renderAttendanceRecords(data);
+  } catch (error) {
+    console.error("Failed to fetch attendance:", error);
+    window.alert("Could not retrieve attendance.");
+  }
+});
+
+function renderAttendanceRecords(records) {
+  const container = document.getElementById("confirmationContainer");
+  container.innerHTML = "<h5>Attendance Records</h5>";
+
+  if (records.length === 0) {
+    container.innerHTML += "<p>No attendance records found.</p>";
+    return;
+  }
+
+  const list = document.createElement("ul");
+  list.className = "collection";
+  records.forEach(record => {
+    const item = document.createElement("li");
+    item.className = "collection-item";
+    const date = new Date(record.timestamp);
+    item.textContent = `${record.name} - ${date.toLocaleString()}`;
+    list.appendChild(item);
+  });
+
+  container.appendChild(list);
+}
 
 

@@ -1,9 +1,10 @@
-from fastapi import FastAPI, Form, Request, HTTPException, Depends
+from fastapi import FastAPI, Form, Request, HTTPException, Depends, Header
 from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from google.cloud import firestore
 from typing import Annotated
 import datetime
+from fastapi.responses import JSONResponse
 
 app = FastAPI()
 
@@ -57,3 +58,20 @@ async def mark_attendance(name: Annotated[str, Form()], uid: Annotated[str, Form
 async def confirm_page(request: Request):
     return templates.TemplateResponse("confirm.html", {"request": request})
 
+
+@app.post("/view_attendance")
+async def view_attendance(request: Request, courseId: Annotated[str, Form()]):
+    db = firestore.Client()
+    collection_ref = db.collection("attendance")
+    query = collection_ref.where("courseId", "==", courseId)
+    docs = query.stream()
+
+    records = []
+    for doc in docs:
+        data = doc.to_dict()
+        records.append({
+            "name": data.get("name"),
+            "timestamp": data.get("timestamp")
+        })
+
+    return JSONResponse(content=records)
