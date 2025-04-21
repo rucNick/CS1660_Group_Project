@@ -71,10 +71,15 @@ jobs:
           platforms: linux/amd64,linux/arm64
 
       # build and push the image
-      - name: Build and Push
+      - name: Set short SHA
+        run: echo "SHORT_SHA=$(git rev-parse --short HEAD)" >> $GITHUB_ENV
+
+      - name: Build and Push Docker Image
         uses: docker/build-push-action@v6
         with:
           context: ./
           file: ./Dockerfile
           push: true
-          tags: us-central1-docker.pkg.dev/qr-attendance-455219/qr-attendance/app:v1
+          tags: |
+            us-central1-docker.pkg.dev/qr-attendance-455219/qr-attendance/app:${{ env.SHORT_SHA }}
+
