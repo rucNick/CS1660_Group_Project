@@ -1,5 +1,5 @@
 # CS1660 Final Project
-Nick Cao, Maggie Lin, Kate Fierens, Ben, Satvvik
+Nick Cao, Maggie Lin, Kate Fierens, Ben Radovic, Satvvik
 
 TLDR/Getting Started, Description of the service, Architectual diagram, Roadmap/next steps of the project, and any additional information about your implementation
 
