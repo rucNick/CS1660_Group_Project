@@ -58,44 +58,23 @@
   <br>
   
   <div id="bodyInfo" style="display: flex; justify-content: center; flex-direction: column; align-items: center; height: 100vh;">
-    <div class="attendance marker" id="markAttendance" style="text-align: center; display: none;">
+    <div class="attendance marker" style="text-align: center;">
       <h3>Mark Attendance</h3>
       <button class="btn" id="checkIn">Check in</button>
+      <button class="btn" id="viewAttendance" style="display: none;">View Attendance</button> 
     </div>
-    
-    <div class="attendance marker" id="viewAttendanceSection" style="text-align: center; display: none;">
-      <h3>Student Attendance</h3>
-      <button class="btn" id="viewAttendance">View Attendance</button>
+
+    <div id="confirmationContainer" style="display: flex; justify-content: center; flex-direction: column; align-items: center;">
     </div>
-  
-    <div id="confirmationContainer" style="display: none; flex-direction: column; align-items: center;">
-    </div>
-  </div>  
+  </div>
 
   <script>
-    const isStudent = true;
-    const hasCheckedInToday = false;
-
-    if (isStudent && !hasCheckedInToday) {
-      document.getElementById("markAttendance").style.display = "block";
-    } else {
-      document.getElementById("viewAttendanceSection").style.display = "block";
-    }
-
     document.getElementById("checkIn").addEventListener("click", function () {
       checkIn();
     });
 
     document.getElementById("signInButton").addEventListener("click", function () {
       toggle();
-    });
-
-    document.getElementById("submitRoleCourse").addEventListener("click", function () {
-      submit();
-    });
-
-    document.getElementById("viewAttendance").addEventListener("click", function () {
-      viewAttendance();
     });
 
     document.addEventListener('DOMContentLoaded', function () {
