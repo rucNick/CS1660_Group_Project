@@ -9,8 +9,6 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
   <script src="https://www.gstatic.com/firebasejs/7.18/firebase-app.js"></script>
   <script src="https://www.gstatic.com/firebasejs/8.0/firebase.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-firestore.js"></script>
   <script src="/static/config.js"></script>
   <script src="/static/firebase.js"></script>
   <link rel="icon"
@@ -60,12 +58,12 @@
   <br>
   
   <div id="bodyInfo" style="display: flex; justify-content: center; flex-direction: column; align-items: center; height: 100vh;">
-    <div class="attendance marker" style="text-align: center;">
+    <div class="attendance marker" id="markAttendance" style="text-align: center; display: none;">
       <h3>Mark Attendance</h3>
       <button class="btn" id="checkIn">Check in</button>
     </div>
-
-    <div class="attendance marker" style="text-align: center;">
+    
+    <div class="attendance marker" id="viewAttendanceSection" style="text-align: center; display: none;">
       <h3>Student Attendance</h3>
       <button class="btn" id="viewAttendance">View Attendance</button>
     </div>
@@ -75,6 +73,14 @@
   </div>
 
   <script>
+    const isStudent = true;
+    const hasCheckedInToday = false;
+
+    if (isStudent && !hasCheckedInToday) {
+      document.getElementById("markAttendance").style.display = "block";
+    } else {
+      document.getElementById("viewAttendanceSection").style.display = "block";
+    }
 
     document.getElementById("checkIn").addEventListener("click", function () {
       checkIn();
