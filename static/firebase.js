@@ -204,16 +204,18 @@ async function viewAttendance(courseId) {
 
       const role = 'Professor'; 
 
-      const response = await fetch(`https://qr-attendance-1043677821736.us-central1.run.app/?courseId=${courseId}&role=${role}`, {
+      const response = await fetch('/attend', {
         method: "GET",
         headers: {
-          "Authorization": `Bearer ${token}`
+          'Content-Type': 'application/x-www-form-urlencoded',
+          'Authorization': `Bearer ${token}`
         }
       });
 
       if (response.ok) {
         const html = await response.text();
         document.getElementById("attendance-container").innerHTML = html;
+        document.getElementById("attendance-container").style.display = "block";
       } else {
         const errorData = await response.json();
         window.alert(`Failed! ${errorData.error}`);

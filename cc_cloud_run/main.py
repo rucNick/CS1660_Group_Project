@@ -41,7 +41,7 @@ async def confirm_page(request: Request):
     return templates.TemplateResponse("confirm.html", {"request": request})
 
 
-@app.get("/attendance")
+@app.get("/attend")
 async def show_attendance_page(request: Request, courseId: str, user_role: str):
     if user_role != "professor":
         raise HTTPException(status_code=403, detail="Permission denied")
@@ -61,18 +61,5 @@ async def show_attendance_page(request: Request, courseId: str, user_role: str):
         "attendance_records": attendance_data
     })
 
-
-# @app.post("/attendance")
-# async def add_attendance(name: Annotated[str, Form()], courseId: Annotated[str, Form()]):
-#     if not name or not courseId:
-#         raise HTTPException(status_code=400, detail="Missing user name or course ID")
-
-#     attendance_collection.add({
-#         "name": name,
-#         "courseId": courseId,
-#         "timestamp": datetime.datetime.utcnow().isoformat()
-#     })
-    
-#     return {"message": "Attendance recorded", "name": name}
 
 

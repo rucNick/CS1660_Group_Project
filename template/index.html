@@ -63,6 +63,7 @@
       <div style="display: flex; flex-direction: column; gap: 10px; align-items: center;">
         <button class="btn" id="checkIn">Check in</button>
         <button class="btn" id="viewAttendance" style="display: none;">View Attendance</button>
+        <div id="attendance-container" style="display: none; margin: 40px auto; max-width: 800px;"></div>
         <h4 class="header center">Attendance Records</h4>
         <ul class="container collection center">
           {% for record in attendance_records %}
