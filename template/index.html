@@ -7,7 +7,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/7.18/firebase-app.js"></script>
+  <!-- <script src="https://www.gstatic.com/firebasejs/7.18/firebase-app.js"></script> -->
   <script src="https://www.gstatic.com/firebasejs/8.0/firebase.js"></script>
   <script src="/static/config.js"></script>
   <script src="/static/firebase.js"></script>
@@ -69,7 +69,7 @@
           <li class="collection-item avatar">
             <i class="material-icons circle teal lighten-1">person</i>
             <span class="title">Student:</span> <b>'{{ record.name }}'</b>
-            <p>Checked in at {{ record.timestamp.strftime("%Y-%m-%d %H:%M:%S") }}</p>
+            <p>Checked in at {{ record.timestamp}}</p>
           </li>
           {% endfor %}
         </ul>
