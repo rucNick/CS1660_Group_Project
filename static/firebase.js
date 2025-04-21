@@ -193,8 +193,9 @@ document.getElementById("viewAttendance").addEventListener("click", async () => 
   const params = new URLSearchParams(window.location.search);
   const courseId = params.get("courseId");
 
+  console.log("Course ID from URL:", courseId);
   if (!courseId) {
-    window.alert("Course ID missing.");
+    alert("Course ID missing.");
     return;
   }
 
@@ -211,10 +212,11 @@ document.getElementById("viewAttendance").addEventListener("click", async () => 
     });
 
     const data = await response.json();
+    console.log("Attendance data received:", data);
     renderAttendanceRecords(data);
   } catch (error) {
     console.error("Failed to fetch attendance:", error);
-    window.alert("Could not retrieve attendance.");
+    alert("Could not retrieve attendance.");
   }
 });
 
