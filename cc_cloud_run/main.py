@@ -32,6 +32,24 @@ async def mark_attendance(name: Annotated[str, Form()], uid: Annotated[str, Form
         "courseId": courseId,
         "role": role,
     })
+    if role.lower() == "professor":
+        all_attendance_query = attendance_collection.where("courseId", "==", courseId).stream()
+        all_attendance = []
+
+        for record in all_attendance_query:
+            data = record.to_dict()
+            all_attendance.append({
+                "name": data.get("name"),
+                "timestamp": data.get("timestamp"),
+                "uid": data.get("uid")
+            })
+
+        return {
+            "detail": "Attendance recorded for professor",
+            "timestamp": timestamp,
+            "attendance": all_attendance
+        }
+    
     return {"detail": "Attendance recorded", "timestamp": timestamp}
 
 @app.post("/submit")

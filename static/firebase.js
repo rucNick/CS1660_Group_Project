@@ -430,13 +430,46 @@ async function checkIn() {
 //   }
 // }
 
+function renderProfessorAttendance(attendanceList) {
+  const container = document.getElementById("confirmationContainer");
+  container.innerHTML = `<h5>Attendance Records</h5>`;
+  const table = document.createElement('table');
+  table.classList.add('striped');
+
+  const thead = document.createElement('thead');
+  thead.innerHTML = `
+    <tr>
+      <th>Name</th>
+      <th>Course</th>
+      <th>Timestamp</th>
+    </tr>`;
+  table.appendChild(thead);
+
+  const tbody = document.createElement('tbody');
+  attendanceList.forEach(entry => {
+    const row = document.createElement('tr');
+    const date = new Date(entry.timestamp?.seconds * 1000).toLocaleString();
+    row.innerHTML = `
+      <td>${entry.name}</td>
+      <td>${entry.courseId}</td>
+      <td>${date}</td>`;
+    tbody.appendChild(row);
+  });
+
+  table.appendChild(tbody);
+  container.appendChild(table);
+}
+
+
 function renderRoleUI(role) {
   const checkInButton = document.getElementById("checkIn");
   const viewAttendanceButton = document.getElementById("viewAttendance");
 
   if (role === "Professor") {
     checkInButton.style.display = "none"; 
-    viewAttendanceButton.style.display = "block"; 
+    viewAttendanceButton.style.display = "block";
+    const data = await response.json();
+    renderProfessorAttendance(data.attendance); 
   } else if (role === "Student") {
     checkInButton.style.display = "block"; 
     viewAttendanceButton.style.display = "none"; 
