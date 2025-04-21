@@ -264,7 +264,7 @@ async function addAttendance(courseId) {
       const formData = new URLSearchParams();
       formData.append("name", userName); 
       formData.append("courseId", courseId);  
-      const response = await fetch("/attendance", {
+      const response = await fetch("/attend", {
         method: "POST",
         headers: {
           "Content-Type": "application/x-www-form-urlencoded",
