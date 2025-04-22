@@ -213,18 +213,18 @@ async function viewAttendance(courseId) {
       });
 
       if (response.ok) {
-        // const html = await response.text();
-        // document.getElementById("attendance-container").innerHTML = html;
-        // document.getElementById("attendance-container").style.display = "block";
-        
-        const buttonText = document.getElementById("viewAttendance").innerText;
-        console.log(buttonText);
-      
-        const heading = document.getElementById("AttendanceRecordsHeader").innerText;
-        console.log(heading);
-
         const html = await response.text();
-        console.log(document.getElementById("attendance-container").innerHTML = html);
+        document.getElementById("attendance-container").innerHTML = html;
+        document.getElementById("attendance-container").style.display = "block";
+        
+        // const buttonText = document.getElementById("viewAttendance").innerText;
+        // console.log(buttonText);
+      
+        // const heading = document.getElementById("AttendanceRecordsHeader").innerText;
+        // console.log(heading);
+
+        // const html = await response.text();
+        // console.log(document.getElementById("attendance-container").innerHTML = html);
       
       } else {
         const errorData = await response.json();
