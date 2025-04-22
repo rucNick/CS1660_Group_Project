@@ -215,7 +215,7 @@ async function viewAttendance(courseId) {
       if (response.ok) {
         const html = await response.text();
         document.getElementById("attendance-container").innerHTML = html;
-        document.getElementById("attendance-container").style.display = "block";
+        console.log(document.getElementById("attendance-container").innerHTML = html);
         
         // const buttonText = document.getElementById("viewAttendance").innerText;
         // console.log(buttonText);
