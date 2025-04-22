@@ -17,9 +17,9 @@
 
 <body class="blue lighten-5">
   <nav class="blue darken-2">
-    <div class="nav-wrapper container"><a class="brand-logo center">Attendance System</a></div>
+    <div class="nav-wrapper container"><a class="brand-logo center" style="display: none;" id="AttendanceSystemHeader"> Attendance System</a></div>
     <ul class="left" id="nav-mobile">
-      <button class="waves-effect waves-light btn" id="signInButton">Sign In with Google</button>
+      <button class="waves-effect waves-light btn" id="signInButton" style="display: none;">Sign In with Google</button>
     </ul>
   </nav>
 
@@ -58,27 +58,33 @@
   <br>
   
   <div id="bodyInfo" style="display: flex; justify-content: center; flex-direction: column; align-items: center; height: 100vh;">
+    <!-- First Div: Check-in Button -->
     <div class="attendance marker" style="text-align: center;">
-      <h3>Attendance</h3>
+      <h3 id="AttendanceHeader" style="display: none">Attendance</h3>
       <div style="display: flex; flex-direction: column; gap: 10px; align-items: center;">
-        <button class="btn" id="checkIn">Check in</button>
-        <button class="btn" id="viewAttendance" style="display: none;">View Attendance</button>
-        <div id="attendance-container" style="display: none; margin: 40px auto; max-width: 800px;"></div>
-        <h4 class="header center">Attendance Records</h4>
-        <ul class="container collection center">
-          {% for record in attendance_records %}
-          <li class="collection-item avatar">
-            <i class="material-icons circle teal lighten-1">person</i>
-            <span class="title">Student:</span> <b>'{{ record.name }}'</b>
-            <p>Checked in at {{ record.timestamp}}</p>
-          </li>
-          {% endfor %}
-        </ul>
+        <button class="btn" id="checkIn" style="display: none">Check in</button>
+        <div id="confirmationContainer" style="display: flex; justify-content: center; flex-direction: column; align-items: center;"></div>
       </div>
     </div>
   
-    <div id="confirmationContainer" style="display: flex; justify-content: center; flex-direction: column; align-items: center;">
+    <!-- Second Div: View Attendance + Records -->
+    <div id="attendance-container" style="display: block; margin: 40px auto; max-width: 800px;">
+      <button class="btn" id="viewAttendance" >View Attendance</button>
+  
+      <h4 id="attedanceRecordsHeader" class="header center">Attendance Records</h4>
+      <ul class="container collection center">
+        {% for record in attendance_records %}
+        <li class="collection-item avatar">
+          <i class="material-icons circle teal lighten-1">person</i>
+          <span class="title">Student:</span> <b>'{{ record.name }}'</b>
+          <p>Checked in at {{ record.timestamp }}</p>
+        </li>
+        {% endfor %}
+      </ul>
     </div>
+  
+  </div>  
+
   </div>
   
 

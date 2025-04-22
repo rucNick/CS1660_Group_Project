@@ -13,6 +13,9 @@ function initApp() {
     const signInButton = document.getElementById('signInButton');
     const checkInButton = document.getElementById('checkIn');
     const viewAttendanceButton = document.getElementById('viewAttendance');
+    const attedanceRecordsHeader = document.getElementById('attedanceRecordsHeader');
+    const AttendanceHeader = document.getElementById('AttendanceHeader');
+    const AttendanceSystemHeader = document.getElementById('AttendanceSystemHeader');
     if (user) {
       signInButton.innerText = 'Sign Out';
       document.getElementById('bodyInfo').style.display = '';
@@ -24,12 +27,18 @@ function initApp() {
       if (role === 'Professor') {
         checkInButton.style.display = 'none';
         viewAttendanceButton.style.display = 'block';
+        signInButton.style.display = 'block';
+        AttendanceSystemHeader.style.display = 'block';
         viewAttendanceButton.addEventListener("click", function () {
           viewAttendance(courseId);
         });
       } else if (role === 'Student') {
         viewAttendanceButton.style.display = 'none';
         checkInButton.style.display = 'block';
+        signInButton.style.display = 'block';
+        AttendanceHeader.style.display = 'block';
+        AttendanceSystemHeader.style.display = 'block';
+        attedanceRecordsHeader.style.display = 'none';
       }
     } else {
       signInButton.innerText = 'Sign In with Google';
