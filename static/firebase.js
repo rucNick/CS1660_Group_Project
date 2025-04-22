@@ -213,6 +213,7 @@ async function viewAttendance(courseId) {
       });
 
       if (response.ok) {
+<<<<<<< HEAD
         // const html = await response.text();
         // console.log(document.getElementById("attendance-container").innerHTML = html);
         
@@ -226,6 +227,11 @@ async function viewAttendance(courseId) {
         console.log(document.getElementById("containerCollectionCenter").innerHTML = html);
         
       
+=======
+        const html = await response.text();
+        document.getElementById("attendance-container").innerHTML = html;
+        document.getElementById("attendance-container").style.display = "block";
+>>>>>>> parent of aaa835f (update)
       } else {
         const errorData = await response.json();
         window.alert(`Failed! ${errorData.error}`);
@@ -238,3 +244,5 @@ async function viewAttendance(courseId) {
     window.alert('User not signed in.');
   }
 }
+
+
