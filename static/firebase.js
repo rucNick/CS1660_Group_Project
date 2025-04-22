@@ -213,9 +213,16 @@ async function viewAttendance(courseId) {
       });
 
       if (response.ok) {
-        const html = await response.text();
-        document.getElementById("attendance-container").innerHTML = html;
-        document.getElementById("attendance-container").style.display = "block";
+        // const html = await response.text();
+        // console.log(document.getElementById("attendance-container").innerHTML = html);
+        const buttonText = document.getElementById("viewAttendance").innerText;
+        console.log(buttonText);
+
+        const heading = document.getElementById("AttendanceRecordsHeader").innerText;
+        console.log(heading);
+
+        const ul = document.getElementById("containerCollectionCenter");
+        console.log(ul.innerHTML);
       } else {
         const errorData = await response.json();
         window.alert(`Failed! ${errorData.error}`);
@@ -228,5 +235,3 @@ async function viewAttendance(courseId) {
     window.alert('User not signed in.');
   }
 }
-
-
