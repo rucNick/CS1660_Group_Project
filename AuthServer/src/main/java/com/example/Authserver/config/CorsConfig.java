@@ -24,7 +24,6 @@ public class CorsConfig {
                 "https://qr-attendance-1043677821736.us-central1.run.app"
         ));
 
-        // Allow credentials (cookies)
         config.setAllowCredentials(true);
 
         config.setAllowedHeaders(Arrays.asList(
@@ -32,11 +31,22 @@ public class CorsConfig {
                 "Content-Type",
                 "Accept",
                 "Authorization",
-                "X-Requested-With"
+                "X-Requested-With",
+                "Access-Control-Allow-Origin",
+                "Access-Control-Allow-Credentials"
         ));
 
-        // Allow common methods
-        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        // Allow all common methods
+        config.setAllowedMethods(Arrays.asList("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+
+        // Expose headers that the frontend might need
+        config.setExposedHeaders(Arrays.asList(
+                "Access-Control-Allow-Origin",
+                "Access-Control-Allow-Credentials"
+        ));
+
+        // Set max age for preflight requests
+        config.setMaxAge(3600L);
 
         source.registerCorsConfiguration("/**", config);
         return new CorsFilter(source);

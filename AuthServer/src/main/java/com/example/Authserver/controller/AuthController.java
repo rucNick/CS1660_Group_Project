@@ -21,9 +21,12 @@ import java.util.UUID;
 @Tag(name = "Auth Controller", description = "APIs for authentication and user management")
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = {"https://auth-server-1043677821736.us-central1.run.app", "https://qr-attendance-1043677821736.us-central1.run.app",
+@CrossOrigin(origins = {"https://auth-server-1043677821736.us-central1.run.app",
+        "https://qr-attendance-1043677821736.us-central1.run.app",
         "http://localhost:3000", "http://localhost:8000", "http://127.0.0.1:8000"},
         allowedHeaders = "*",
+        methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PUT,
+                RequestMethod.DELETE, RequestMethod.OPTIONS},
         allowCredentials = "true")
 public class AuthController {
 
@@ -33,7 +36,11 @@ public class AuthController {
     public AuthController(UserService userService) {
         this.userService = userService;
     }
-
+    //option request format
+    @RequestMapping(method = RequestMethod.OPTIONS)
+    public ResponseEntity<?> handleOptions() {
+        return ResponseEntity.ok().build();
+    }
     // EXISTING LOGIN ENDPOINT
     @Operation(summary = "User login", description = "Authenticates a user with email and password")
     @PostMapping("/login")
