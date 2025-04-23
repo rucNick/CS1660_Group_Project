@@ -23,7 +23,7 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
 
     private final UserService userService;
 
-    @Value("${frontend.url:http://localhost:3000}")
+    @Value("${frontend.url:https://your-cloudrun-frontend-url.run.app}")
     private String frontendUrl;
 
     @Autowired
@@ -56,6 +56,13 @@ public class OAuth2SuccessHandler implements AuthenticationSuccessHandler {
         // Store user ID in session
         HttpSession session = request.getSession();
         session.setAttribute("userId", user.getId());
+
+        // Get the origin for CORS-compatible redirects
+        String origin = request.getHeader("Origin");
+        if (origin == null || origin.isEmpty()) {
+            // Default to frontend URL if Origin header is not present
+            origin = frontendUrl;
+        }
 
         // Redirect to frontend based on role assignment
         if (!user.isRoleAssigned()) {

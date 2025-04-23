@@ -17,8 +17,10 @@ public class CorsConfig {
 
         config.setAllowedOrigins(Arrays.asList(
                 "http://localhost:3000",
-                "http://localhost:8000",  // Your frontend
-                "http://127.0.0.1:8000"
+                "http://localhost:8000",
+                "http://127.0.0.1:8000",
+                "https://auth-server-1043677821736.us-central1.run.app",
+                "https://qr-attendance-455219.web.app"
         ));
 
         // Allow credentials (cookies)

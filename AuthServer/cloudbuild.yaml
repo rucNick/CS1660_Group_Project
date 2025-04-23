@@ -25,4 +25,4 @@ images:
   - 'gcr.io/$PROJECT_ID/auth-server:$COMMIT_SHA'
 
 substitutions:
-  _FRONTEND_URL: https://your-frontend-url.com
+  _FRONTEND_URL: https://qr-attendance-1043677821736.us-central1.run.app,GOOGLE_CLIENT_ID=1043677821736-sd578og9up9kkobht663q1dchucsrhep.apps.googleusercontent.com,GOOGLE_CLIENT_SECRET=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

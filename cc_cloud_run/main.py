@@ -41,7 +41,7 @@ db = firestore.Client()
 attendance_collection = db.collection("attendance")
 
 # Environment variables
-AUTH_SERVER_URL = "http://localhost:8080" 
+AUTH_SERVER_URL = "https://auth-server-1043677821736.us-central1.run.app" 
 
 # Validate session with AuthServer
 async def validate_session(sessionid: Optional[str] = Cookie(None)):
