@@ -62,7 +62,7 @@ signIn = async function() {
       document.getElementById("submitRoleCourse").onclick = async () => {
         const role = document.getElementById("roleSelect").value;
         const course = document.getElementById("courseSelect").value;
-
+        
         if (!role || !course) {
           window.alert("Please select a role and a course.");
           return;
@@ -209,30 +209,31 @@ async function loginUser() {
       const modal = M.Modal.getInstance(document.getElementById('roleCourseModal'));
       modal.open();
       
-      document.getElementById("submitRoleCourse").onclick = async () => {
+      document.getElementById("submitRoleCourse").onclick = async function() {
         const role = document.getElementById("roleSelect").value;
         const course = document.getElementById("courseSelect").value;
+        const userId = userData.userId || localStorage.getItem('pendingUserId');
         
         if (!role || !course) {
           window.alert("Please select a role and a course.");
           return;
         }
         
+        if (!userId) {
+          window.alert("User ID not found. Please try logging in again.");
+          return;
+        }
+        
         try {
-          // Create a more minimal payload to reduce chances of errors
+          // Create a minimal payload with just the essential fields
           const roleData = {
-            userId: userData.userId,
+            userId: userId,
             role: role.toLowerCase()
           };
           
-          // Only add necessary additional data based on role
-          if (role.toLowerCase() === "student") {
-            roleData.studentId = "STU-" + Math.floor(10000 + Math.random() * 90000);
-          }
+          console.log("Sending simplified role data:", roleData);
           
-          console.log("Sending role data:", roleData);
-          
-          // Call AuthServer to assign role with better error handling
+          // Make the API call with simple payload
           const roleResponse = await fetch(`${AUTH_SERVER_URL}/api/auth/role`, {
             method: 'POST',
             headers: {
@@ -244,41 +245,52 @@ async function loginUser() {
             body: JSON.stringify(roleData)
           });
           
-          // Get response text for better error handling
-          let responseText;
+          // Get full response for debugging
+          let responseText = "";
           try {
             responseText = await roleResponse.text();
-            console.log("Role assignment response:", responseText);
+            console.log("Complete server response:", responseText);
           } catch (e) {
-            console.error("Failed to get response text:", e);
-            responseText = "";
+            console.error("Could not read response text:", e);
           }
           
           if (!roleResponse.ok) {
-            throw new Error(`Failed to assign role: ${responseText}`);
+            console.error(`Server error (${roleResponse.status}): ${responseText}`);
+            throw new Error(`Role assignment failed with status ${roleResponse.status}`);
           }
           
-          let roleResult;
+          // Parse the response with fallback
+          let roleResult = {};
           try {
             roleResult = JSON.parse(responseText);
+            console.log('Parsed role assignment result:', roleResult);
           } catch (e) {
-            console.error("Failed to parse JSON response:", e);
-            roleResult = { role: role.toLowerCase() };
+            console.warn("Could not parse response as JSON, using default values");
+            roleResult = { 
+              userId: userId,
+              role: role.toLowerCase()
+            };
           }
           
-          console.log('Role assignment result:', roleResult);
-          
-          // Update stored user info with fallbacks
-          localStorage.setItem('authUser', JSON.stringify({
-            userId: userData.userId,
-            email: userData.email,
-            fullName: userData.fullName,
-            role: roleResult.role || role.toLowerCase(),
+          // Store user information in localStorage
+          const userInfo = {
+            userId: userId,
+            email: userData ? userData.email : "",
+            fullName: userData ? userData.fullName : "",
+            role: role.toLowerCase(),
             roleAssigned: true,
-            primaryCourse: course,
-            courses: role.toLowerCase() === "professor" ? [course] : [],
-            enrolledCourses: role.toLowerCase() === "student" ? [course] : []
-          }));
+            courseId: course
+          };
+          
+          // Add role-specific data
+          if (role.toLowerCase() === "student") {
+            userInfo.enrolledCourses = [course];
+          } else if (role.toLowerCase() === "professor") {
+            userInfo.teachingCourses = [course];
+          }
+          
+          localStorage.setItem('authUser', JSON.stringify(userInfo));
+          localStorage.removeItem('pendingUserId'); // Clean up if it was used
           
           // Update URL with role and course
           const url = new URL(window.location.href);
@@ -286,30 +298,41 @@ async function loginUser() {
           url.searchParams.set("role", role.toLowerCase());
           history.replaceState(null, "", url.toString());
           
+          // Close the modal
+          const modal = M.Modal.getInstance(document.getElementById('roleCourseModal'));
           modal.close();
-          window.alert(`Role: ${role}, Course: ${course} selected`);
           
-          // Update UI
+          window.alert(`Role: ${role}, Course: ${course} assigned successfully!`);
+          
+          // Update UI and reload page
           updateAuthUI(true);
           
-          // Reload page
+          // Small delay before reload to ensure state is saved
           setTimeout(() => {
             window.location.reload();
           }, 500);
         } catch (err) {
           console.error('Role assignment error:', err);
           
-          // Save local data even if server request fails
-          localStorage.setItem('authUser', JSON.stringify({
-            userId: userData.userId,
-            email: userData.email,
-            fullName: userData.fullName,
+          // Store locally even if server request fails
+          const userInfo = {
+            userId: userId,
+            email: userData ? userData.email : "",
+            fullName: userData ? userData.fullName : "",
             role: role.toLowerCase(),
             roleAssigned: true,
-            primaryCourse: course,
-            courses: role.toLowerCase() === "professor" ? [course] : [],
-            enrolledCourses: role.toLowerCase() === "student" ? [course] : []
-          }));
+            courseId: course
+          };
+          
+          // Add role-specific data
+          if (role.toLowerCase() === "student") {
+            userInfo.enrolledCourses = [course];
+          } else if (role.toLowerCase() === "professor") {
+            userInfo.teachingCourses = [course];
+          }
+          
+          localStorage.setItem('authUser', JSON.stringify(userInfo));
+          localStorage.removeItem('pendingUserId'); // Clean up if it was used
           
           // Update URL
           const url = new URL(window.location.href);
@@ -317,10 +340,13 @@ async function loginUser() {
           url.searchParams.set("role", role.toLowerCase());
           history.replaceState(null, "", url.toString());
           
+          // Close the modal
+          const modal = M.Modal.getInstance(document.getElementById('roleCourseModal'));
           modal.close();
-          window.alert(`⚠️ There was an issue with the server, but your role has been saved locally. Role: ${role}, Course: ${course}`);
           
-          // Update UI and reload
+          window.alert(`⚠️ Server error when assigning role, but your selection has been saved locally. You can continue using the app.`);
+          
+          // Update UI anyway and reload
           updateAuthUI(true);
           setTimeout(() => {
             window.location.reload();
@@ -426,8 +452,18 @@ async function registerUser() {
       },
       mode: 'cors',
       credentials: 'same-origin',
-      body: JSON.stringify(roleData)
+      body: JSON.stringify({
+        userId: authData.userId || result.user.uid,
+        role: role.toLowerCase() // Make sure role is lowercase to match server expectations
+      })
     });
+    
+    // Add better error handling
+    if (!roleResponse.ok) {
+      const errorText = await roleResponse.text();
+      console.error("Role assignment error response:", errorText);
+      throw new Error(`Failed to assign role: ${errorText}`);
+    }
     
     // Even if role assignment fails, proceed with local data
     let roleResult = {};

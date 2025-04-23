@@ -75,8 +75,9 @@ public class UserService {
 
     public User assignRole(String userId, String role, String studentId) throws ExecutionException, InterruptedException {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found"));
-
+                .orElseThrow(() -> new RuntimeException("User not found with ID: " + userId));
+        // Normalize role
+        role = role.toLowerCase();
         user.setRole(role);
         user.setRoleAssigned(true);
 

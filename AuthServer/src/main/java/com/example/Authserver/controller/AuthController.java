@@ -186,8 +186,15 @@ public class AuthController {
                         .body(Map.of("error", "UserId and role are required"));
             }
 
+            // Normalize role string to handle different formats
+            role = role.toLowerCase();
+            if (!"student".equals(role) && !"professor".equals(role)) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                        .body(Map.of("error", "Role must be either 'student' or 'professor'"));
+            }
+
             // If role is student and no studentId is provided, generate one
-            if ("Student".equalsIgnoreCase(role) && (studentId == null || studentId.isEmpty())) {
+            if ("student".equals(role) && (studentId == null || studentId.isEmpty())) {
                 studentId = "STUDENT-" + UUID.randomUUID().toString().substring(0, 8);
             }
 
@@ -197,11 +204,10 @@ public class AuthController {
                     "userId", user.getId(),
                     "email", user.getEmail(),
                     "fullName", user.getFullName(),
-                    "role", user.getRole(),
-                    "studentId", user.getStudentId()
+                    "role", user.getRole()
             ));
-
         } catch (Exception e) {
+            e.printStackTrace(); // Add this for debugging
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body(Map.of("error", "Error assigning role: " + e.getMessage()));
         }
