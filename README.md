@@ -1,17 +1,18 @@
 # CS1660 Final Project
-Nick Cao, Maggie Lin, Kate Fierens, Ben Radovic, Satvvik
-
-TLDR/Getting Started, Description of the service, Architectual diagram, Roadmap/next steps of the project, and any additional information about your implementation
+Nick Cao, Maggie Lin, Kate Fierens, Ben Radovic, Satvvik Taandon <br>
+https://qr-attendance-1043677821736.us-central1.run.app/
 
 ## TL;DR
 This is a QR attendance app, using the cloud run and CI/CD assignments as a jumping off point with a similar tech stack. In addition to the usual suspects, there is a Java Springboot auth backend.
 
 ## Service Description
-Professors can use a QRcode that contains a link with a unique class ID tag pinned on the app's url. The student or professor can then scan the QR code and be taken to the landing page for that class. They can sign in and either check in as a student, or view the attendance record as the professor. 
-
-The app is deployed on Cloud Run, and performs auth and data storage through GCP as well.
+The app is deployed on Cloud Run, and performs auth and data storage through GCP as well. The diagram below best describes the app, however a brief verbal description may be warranted. The GitHub Actions workflow triggers every time code is pushed to the codebase; builds, dockerizes, and pushes the image to the Artifactory. Once manually deployed, the site can be reached at its base url. Once signed in and authenticated, the user must choose their role and for which class they are teaching or attending. Students are then redirected to a page where they can check in as an attendee of that class with an associated timestamp. If the user is a professor, they can view an attendance record of their class. 
 
 ## Architectural Diagram
+![image](https://github.com/user-attachments/assets/e7d25ffb-bb7e-4cfc-b0c7-941365b30dd2)
+
+## IAM Roles
+![image](https://github.com/user-attachments/assets/b3800c5f-8ffa-4786-868f-243db760f948)
 
 ## Next Steps
 To get the app into a better spot, there are a few improvements that could stand to be made.
