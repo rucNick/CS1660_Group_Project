@@ -216,16 +216,6 @@ async function viewAttendance(courseId) {
         const html = await response.text();
         document.getElementById("attendance-details").innerHTML = html;
         console.log(document.getElementById("attendance-details").innerHTML = html);
-        
-        // const buttonText = document.getElementById("viewAttendance").innerText;
-        // console.log(buttonText);
-      
-        // const heading = document.getElementById("AttendanceRecordsHeader").innerText;
-        // console.log(heading);
-
-        // const html = await response.text();
-        // console.log(document.getElementById("containerCollectionCenter").innerHTML = html);
-      
       } else {
         const errorData = await response.json();
         window.alert(`Failed! ${errorData.error}`);
