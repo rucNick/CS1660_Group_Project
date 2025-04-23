@@ -5,7 +5,7 @@ from fastapi.templating import Jinja2Templates
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from google.cloud import firestore
-from typing import Annotated, Optional
+from typing import Annotated, Optional, List
 import datetime
 import requests
 from fastapi.responses import JSONResponse, RedirectResponse
@@ -32,13 +32,6 @@ TEMPLATE_DIR = os.path.join(PARENT_DIR, "template")
 print(f"Base directory: {BASE_DIR}")
 print(f"Static directory: {STATIC_DIR}")
 print(f"Template directory: {TEMPLATE_DIR}")
-
-# Make sure directories exist before mounting
-if not os.path.exists(STATIC_DIR):
-    print(f"WARNING: Static directory {STATIC_DIR} does not exist!")
-    
-if not os.path.exists(TEMPLATE_DIR):
-    print(f"WARNING: Template directory {TEMPLATE_DIR} does not exist!")
 
 # Mount static files using correct paths
 app.mount("/static", StaticFiles(directory=STATIC_DIR), name="static")
@@ -103,6 +96,7 @@ async def mark_attendance(
     uid: Annotated[str, Form()], 
     courseId: Annotated[str, Form()], 
     role: Annotated[str, Form()],
+    authServerId: Optional[str] = Form(None),
     auth_data: Optional[dict] = Depends(validate_session)
 ):
     # Check if user is authenticated with AuthServer
@@ -120,23 +114,25 @@ async def mark_attendance(
     
     # Record attendance in Firestore
     timestamp = datetime.datetime.utcnow().isoformat()
-    attendance_collection.add({
+    attendance_doc = {
         "name": name,
         "uid": uid,
         "timestamp": timestamp,
         "courseId": courseId,
         "role": role,
-        "authServerId": auth_data.get("userId") if auth_data else None
-    })
+    }
+    # Add AuthServer ID if available
+    if auth_data and auth_data.get("userId"):
+        attendance_doc["authServerId"] = auth_data.get("userId")
+    elif authServerId:
+        attendance_doc["authServerId"] = authServerId
+    
+    attendance_collection.add(attendance_doc)
     
     return {"detail": "Attendance recorded", "timestamp": timestamp}
 
 @app.get("/confirm")
 async def confirm_page(request: Request, auth_data: Optional[dict] = Depends(validate_session)):
-    if not auth_data:
-        # Redirect to login if not authenticated
-        return RedirectResponse(url="/")
-    
     return templates.TemplateResponse("confirm.html", {"request": request})
 
 @app.get("/attend")
@@ -163,7 +159,57 @@ async def show_attendance_page(
             "timestamp": data.get("timestamp")
         })
 
+    # Sort attendance records by timestamp (most recent first)
+    attendance_data.sort(key=lambda x: x["timestamp"], reverse=True)
+
     return templates.TemplateResponse("attendance_list.html", {
         "request": request,
-        "attendance_records": attendance_data
+        "attendance_records": attendance_data,
+        "course_id": courseId
     })
+
+# Get all classes for a professor
+@app.get("/api/classes")
+async def get_professor_classes(auth_data: Optional[dict] = Depends(validate_session)):
+    if not auth_data or auth_data.get("role") != "Professor":
+        raise HTTPException(status_code=403, detail="Only professors can access class lists")
+    
+    classes = [
+        {"id": "CS1501", "name": "Algorithm Implementation"},
+        {"id": "CS1502", "name": "Formal Methods in Computer Science"},
+        {"id": "CS1520", "name": "Programming Languages for Web Applications"},
+        {"id": "CS1550", "name": "Introduction to Operating Systems"},
+        {"id": "CS1555", "name": "Database Management Systems"},
+        {"id": "CS1635", "name": "Interface Design Methodology"},
+        {"id": "CS1660", "name": "Introduction to Cloud Computing"}
+    ]
+    
+    return {"classes": classes}
+
+# Get all attendance records for a class
+@app.get("/api/attendance/{course_id}")
+async def get_course_attendance(
+    course_id: str,
+    auth_data: Optional[dict] = Depends(validate_session)
+):
+    if not auth_data or auth_data.get("role") != "Professor":
+        raise HTTPException(status_code=403, detail="Only professors can access attendance records")
+    
+    # Get attendance records for the course
+    records = attendance_collection.where("courseId", "==", course_id).stream()
+    attendance_data = []
+
+    for r in records:
+        data = r.to_dict()
+        attendance_data.append({
+            "id": r.id,
+            "name": data.get("name"),
+            "timestamp": data.get("timestamp"),
+            "uid": data.get("uid"),
+            "authServerId": data.get("authServerId")
+        })
+
+    # Sort attendance records by timestamp (most recent first)
+    attendance_data.sort(key=lambda x: x["timestamp"], reverse=True)
+    
+    return {"course_id": course_id, "records": attendance_data}

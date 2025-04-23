@@ -1,10 +1,38 @@
-<h4 id="AttendanceRecordsHeader" class="header center">Attendance Records</h4>
-<ul id="containerCollectionCenter" class="container collection center">
-    {% for record in attendance_records %}
-    <li class="collection-item avatar">
+<div class="container">
+    <h4 id="AttendanceRecordsHeader" class="header center">Attendance Records for {{ course_id }}</h4>
+    
+    {% if attendance_records %}
+    <div class="card">
+      <div class="card-content">
+        <p class="center-align">Total Records: {{ attendance_records|length }}</p>
+      </div>
+    </div>
+    
+    <ul id="containerCollectionCenter" class="collection">
+      {% for record in attendance_records %}
+      <li class="collection-item avatar">
         <i class="material-icons circle teal lighten-1">person</i>
-        <span class="title">Student:</span> <b>'{{ record.name }}'</b>
-        <p>Checked in at {{ record.timestamp}}</p>
-    </li>
-    {% endfor %}
-</ul>
+        <span class="title"><b>{{ record.name }}</b></span>
+        <p>
+          Checked in at: {{ record.timestamp }}<br>
+          {% if record.get("authServerId") %}
+          AuthServer ID: {{ record.get("authServerId") }}
+          {% endif %}
+        </p>
+        <span class="secondary-content">
+          <i class="material-icons">access_time</i>
+        </span>
+      </li>
+      {% endfor %}
+    </ul>
+    
+    {% else %}
+    <div class="card-panel center-align">
+      <span class="blue-text text-darken-2">No attendance records found for this course.</span>
+    </div>
+    {% endif %}
+    
+    <div class="center-align" style="margin-top: 20px;">
+      <a href="/" class="waves-effect waves-light btn blue">Back to Home</a>
+    </div>
+  </div>

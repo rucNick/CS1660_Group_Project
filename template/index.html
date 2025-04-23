@@ -10,21 +10,51 @@
   <script src="https://www.gstatic.com/firebasejs/8.0/firebase.js"></script>
   <script src="/static/config.js"></script>
   <script src="/static/firebase.js"></script>
-  <script src="/static/auth-integration.js"></script>
   <link rel="icon"
     href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>(•‿•)</text></svg>">
+  <style>
+    #nav-mobile {
+      padding-left: 20px;
+      display: flex;
+      gap: 10px;
+    }
+    .modal {
+      max-height: 90%;
+      overflow-y: auto;
+    }
+    .google-btn {
+      background-color: #fff;
+      color: #757575;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+      border: 1px solid #dadce0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 15px;
+      margin: 15px 0;
+      width: 100%;
+    }
+    .google-btn img {
+      margin-right: 10px;
+      width: 18px;
+      height: 18px;
+    }
+  </style>
 </head>
 
 <body class="blue lighten-5">
   <nav class="blue darken-2">
     <div class="nav-wrapper container"><a class="brand-logo center">Attendance System</a></div>
     <ul class="left" id="nav-mobile">
-      <button class="waves-effect waves-light btn" id="signInButton">Sign In with Google</button>
+      <button class="waves-effect waves-light btn" id="loginButton">Login</button>
+      <button class="waves-effect waves-light btn" id="registerButton">Register</button>
+      <button class="waves-effect waves-light btn red" id="signOutButton" style="display: none;">Sign Out</button>
     </ul>
   </nav>
 
   <br>
 
+  <!-- Role/Course Selection Modal -->
   <div id="roleCourseModal" class="modal">
     <div class="modal-content">
       <h4>Choose Role and Course</h4>
@@ -55,10 +85,114 @@
     </div>
   </div>
 
+  <!-- Login Modal (with Google login) -->
+  <div id="loginModal" class="modal">
+    <div class="modal-content">
+      <h4>Login</h4>
+      <div class="row">
+        <div class="input-field col s12">
+          <input id="login-email" type="email" class="validate">
+          <label for="login-email">Email</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="input-field col s12">
+          <input id="login-password" type="password" class="validate">
+          <label for="login-password">Password</label>
+        </div>
+      </div>
+      <div class="row center-align">
+        <button class="waves-effect waves-light btn google-btn" id="googleSignInButton">
+          <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google">
+          Sign in with Google
+        </button>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <a href="#!" class="modal-close waves-effect waves-red btn-flat">Cancel</a>
+      <a href="#!" class="waves-effect waves-green btn" id="submitLogin">Login</a>
+    </div>
+  </div>
+
+  <!-- Register Modal -->
+<div id="registerModal" class="modal">
+  <div class="modal-content">
+    <h4>Register</h4>
+    <div class="row">
+      <div class="input-field col s12">
+        <input id="register-fullName" type="text" class="validate">
+        <label for="register-fullName">Full Name</label>
+      </div>
+    </div>
+    <div class="row">
+      <div class="input-field col s12">
+        <input id="register-email" type="email" class="validate">
+        <label for="register-email">Email</label>
+      </div>
+    </div>
+    <div class="row">
+      <div class="input-field col s12">
+        <input id="register-password" type="password" class="validate">
+        <label for="register-password">Password</label>
+      </div>
+    </div>
+    <div class="row">
+      <div class="input-field col s12">
+        <select id="register-role">
+          <option value="" disabled selected>Choose your role</option>
+          <option value="Student">Student</option>
+          <option value="Professor">Professor</option>
+        </select>
+        <label>Role</label>
+      </div>
+    </div>
+    <!-- Professor-specific fields (hidden by default) -->
+    <div id="professor-fields" style="display: none;">
+      <div class="row">
+        <div class="input-field col s12">
+          <select id="professor-classes" multiple>
+            <option value="" disabled>Select Classes You Teach</option>
+            <option value="CS1501">CS1501</option>
+            <option value="CS1502">CS1502</option>
+            <option value="CS1520">CS1520</option>
+            <option value="CS1550">CS1550</option>
+            <option value="CS1555">CS1555</option>
+            <option value="CS1635">CS1635</option>
+            <option value="CS1660">CS1660</option>
+          </select>
+          <label>Courses You Teach</label>
+        </div>
+      </div>
+    </div>
+    <!-- Student-specific fields (hidden by default) -->
+    <div id="student-fields" style="display: none;">
+      <div class="row">
+        <div class="input-field col s12">
+          <select id="student-classes" multiple>
+            <option value="" disabled>Select Classes You're Enrolled In</option>
+            <option value="CS1501">CS1501</option>
+            <option value="CS1502">CS1502</option>
+            <option value="CS1520">CS1520</option>
+            <option value="CS1550">CS1550</option>
+            <option value="CS1555">CS1555</option>
+            <option value="CS1635">CS1635</option>
+            <option value="CS1660">CS1660</option>
+          </select>
+          <label>Courses You're Enrolled In</label>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="modal-footer">
+    <a href="#!" class="modal-close waves-effect waves-red btn-flat">Cancel</a>
+    <a href="#!" class="waves-effect waves-green btn" id="submitRegister">Register</a>
+  </div>
+</div>
+
   <br>
 
   <div id="bodyInfo"
-    style="display: flex; justify-content: center; flex-direction: column; align-items: center; height: 100vh;">
+    style="display: none; justify-content: center; flex-direction: column; align-items: center; height: 100vh;">
     <div class="attendance marker" style="text-align: center;">
       <h3 id="AttedanceHeader">Attendance</h3>
       <div style="display: flex; flex-direction: column; gap: 10px; align-items: center;">
@@ -75,15 +209,9 @@
     </div>
   </div>
 
+  <script src="/static/auth-integration.js"></script>
+
   <script>
-    document.getElementById("checkIn").addEventListener("click", function () {
-      checkIn();
-    });
-
-    document.getElementById("signInButton").addEventListener("click", function () {
-      toggle();
-    });
-
     document.addEventListener('DOMContentLoaded', function () {
       var elems = document.querySelectorAll('select');
       M.FormSelect.init(elems);
@@ -91,61 +219,103 @@
       var modalElems = document.querySelectorAll('.modal');
       M.Modal.init(modalElems);
       
-      // Check authentication status on page load
-      checkAuthStatus();
+      // Initialize login/register modals
+      document.getElementById("loginButton").addEventListener("click", function() {
+        const loginModal = M.Modal.getInstance(document.getElementById('loginModal'));
+        loginModal.open();
+      });
+      
+      document.getElementById("registerButton").addEventListener("click", function() {
+        const registerModal = M.Modal.getInstance(document.getElementById('registerModal'));
+        registerModal.open();
+      });
+      
+      // Toggle professor/student fields based on role selection
+      document.getElementById("register-role").addEventListener("change", function() {
+        if (this.value === "Professor") {
+          document.getElementById("professor-fields").style.display = "block";
+        } else if (this.value === "Student") {
+          document.getElementById("professor-fields").style.display = "none";
+        }
+      });
+      
+      // Add click handler for check-in button
+      document.getElementById("checkIn").addEventListener("click", function() {
+        checkIn();
+      });
+
+      // Add click handler for sign-out button
+      document.getElementById("signOutButton").addEventListener("click", function() {
+        signOut();
+      });
+
+      // Add click handler for Google sign-in
+      document.getElementById("googleSignInButton").addEventListener("click", function() {
+        const modal = M.Modal.getInstance(document.getElementById('loginModal'));
+        modal.close();
+        signIn();
+      });
+      
+      // Submit register form
+      document.getElementById("submitRegister").addEventListener("click", registerUser);
+      
+      // Submit login form
+      document.getElementById("submitLogin").addEventListener("click", loginUser);
     });
     
-    // Function to check auth status with AuthServer
-    async function checkAuthStatus() {
-      try {
-        const response = await fetch('/api/auth/status', {
-          credentials: 'include'
-        });
-        
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Auth status:', data);
-          
-          if (data.authenticated) {
-            // If authenticated, update UI elements
-            document.getElementById('signInButton').innerText = 'Sign Out';
-            document.getElementById('bodyInfo').style.display = '';
-            
-            // Store auth data
-            localStorage.setItem('authUser', JSON.stringify({
-              userId: data.userId,
-              email: data.email, 
-              fullName: data.fullName,
-              role: data.role,
-              roleAssigned: data.roleAssigned
-            }));
-            
-            // Update URL if needed
-            const currentParams = new URLSearchParams(window.location.search);
-            if (!currentParams.has('role') && data.role) {
-              const url = new URL(window.location);
-              url.searchParams.set('role', data.role);
-              window.history.replaceState({}, '', url);
-            }
-            
-            // Initialize UI based on role
-            const role = data.role;
-            const courseId = currentParams.get('courseId') || '';
-            
-            if (role === 'Professor') {
-              document.getElementById('checkIn').style.display = 'none';
-              document.getElementById('viewAttendance').style.display = 'block';
-              document.getElementById('viewAttendance').addEventListener("click", function () {
-                viewAttendance(courseId);
-              });
-            } else if (role === 'Student') {
-              document.getElementById('viewAttendance').style.display = 'none';
-              document.getElementById('checkIn').style.display = 'block';
-            }
-          }
+    // Fallback function to check if auth is disabled (for testing)
+    function authDisabled() {
+      return localStorage.getItem('authDisabled') === 'true';
+    }
+    
+    // Fallback function to create ID token if not provided by Firebase
+    async function createIdToken() {
+      const user = firebase.auth().currentUser;
+      if (user) {
+        return user.getIdToken();
+      }
+      return "test-token";
+    }
+    
+    // Fallback function to show confirmation message after check-in
+    function showConfirmation(name, timestamp, courseId) {
+      const container = document.getElementById('confirmationContainer');
+      const date = new Date(timestamp);
+      container.innerHTML = `
+        <div class="card blue-grey darken-1">
+          <div class="card-content white-text">
+            <span class="card-title">Attendance Confirmed</span>
+            <p>Thank you, ${name}! Your attendance has been recorded for ${courseId}.</p>
+            <p>Time: ${date.toLocaleString()}</p>
+          </div>
+        </div>
+      `;
+    }
+    
+    // Toggle professor/student fields based on role selection
+    document.getElementById("register-role").addEventListener("change", function() {
+      if (this.value === "Professor") {
+        document.getElementById("professor-fields").style.display = "block";
+        document.getElementById("student-fields").style.display = "none";
+      } else if (this.value === "Student") {
+        document.getElementById("professor-fields").style.display = "none";
+        document.getElementById("student-fields").style.display = "block";
+      }
+    });
+
+    // Function to initialize the application on load
+    function initApp() {
+      const params = new URLSearchParams(window.location.search);
+      const role = params.get('role');
+      
+      if (role) {
+        if (role.toLowerCase() === 'professor') {
+          document.getElementById('checkIn').style.display = 'none';
+          document.getElementById('viewAttendance').style.display = 'block';
+        } else if (role.toLowerCase() === 'student') {
+          document.getElementById('viewAttendance').style.display = 'none';
+          document.getElementById('checkIn').style.display = 'block';
         }
-      } catch (err) {
-        console.error('Error checking auth status:', err);
       }
     }
   </script>

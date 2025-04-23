@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.UUID;
 
 @Tag(name = "Auth Controller", description = "APIs for authentication and user management")
 @RestController
@@ -185,13 +186,19 @@ public class AuthController {
                         .body(Map.of("error", "UserId and role are required"));
             }
 
+            // If role is student and no studentId is provided, generate one
+            if ("Student".equalsIgnoreCase(role) && (studentId == null || studentId.isEmpty())) {
+                studentId = "STUDENT-" + UUID.randomUUID().toString().substring(0, 8);
+            }
+
             User user = userService.assignRole(userId, role, studentId);
 
             return ResponseEntity.ok(Map.of(
                     "userId", user.getId(),
                     "email", user.getEmail(),
                     "fullName", user.getFullName(),
-                    "role", user.getRole()
+                    "role", user.getRole(),
+                    "studentId", user.getStudentId()
             ));
 
         } catch (Exception e) {
