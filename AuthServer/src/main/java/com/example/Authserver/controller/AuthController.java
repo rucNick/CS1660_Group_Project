@@ -4,9 +4,6 @@ import com.example.Authserver.entity.User;
 import com.example.Authserver.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import io.swagger.v3.oas.annotations.responses.ApiResponse;
-import io.swagger.v3.oas.annotations.media.Content;
-import io.swagger.v3.oas.annotations.media.Schema;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
@@ -21,9 +18,9 @@ import java.util.Map;
 import java.util.Optional;
 
 @Tag(name = "Auth Controller", description = "APIs for authentication and user management")
-@RestController // Changed to RestController
+@RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = "*", allowedHeaders = "*") // Added CORS config
+@CrossOrigin(origins = "*", allowedHeaders = "*")
 public class AuthController {
 
     private final UserService userService;
@@ -33,19 +30,8 @@ public class AuthController {
         this.userService = userService;
     }
 
-//    @Operation(summary = "Get login info", description = "Returns information for the login page")
-//    @GetMapping("/login")
-//    public ResponseEntity<?> loginPage() {
-//        // Return an empty success response when frontend requests login page info
-//        return ResponseEntity.ok(Map.of("message", "Login endpoint ready"));
-//    }
-
-    @Operation(summary = "User login", description = "Authenticates a user with email and password",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Successful login",
-                            content = @Content(schema = @Schema(implementation = User.class))),
-                    @ApiResponse(responseCode = "401", description = "Invalid credentials", content = @Content)
-            })
+    // EXISTING LOGIN ENDPOINT
+    @Operation(summary = "User login", description = "Authenticates a user with email and password")
     @PostMapping("/login")
     public ResponseEntity<?> login(@RequestBody Map<String, String> credentials,
                                    HttpSession session) {
@@ -94,12 +80,51 @@ public class AuthController {
         }
     }
 
-    @Operation(summary = "User registration", description = "Registers a new user with email, password, and full name",
-            responses = {
-                    @ApiResponse(responseCode = "201", description = "User created successfully",
-                            content = @Content(schema = @Schema(implementation = User.class))),
-                    @ApiResponse(responseCode = "409", description = "Email already registered", content = @Content)
-            })
+    //GOOGLE LOGIN ENDPOINT
+    @Operation(summary = "Google login", description = "Authenticates a user with Google credentials")
+    @PostMapping("/google/login")
+    public ResponseEntity<?> googleLogin(@RequestBody Map<String, String> data, HttpSession session) {
+        try {
+            String googleId = data.get("googleId");
+            String email = data.get("email");
+            String fullName = data.get("fullName");
+
+            if (googleId == null || email == null || fullName == null) {
+                return ResponseEntity.badRequest()
+                        .body(Map.of("error", "Missing required fields: googleId, email, or fullName"));
+            }
+
+            // Find or create user
+            User user = userService.findOrCreateGoogleUser(googleId, email, fullName);
+
+            // Store user ID in session
+            session.setAttribute("userId", user.getId());
+
+            // Return user data
+            if (!user.isRoleAssigned()) {
+                return ResponseEntity.ok(Map.of(
+                        "userId", user.getId(),
+                        "email", user.getEmail(),
+                        "fullName", user.getFullName(),
+                        "roleAssigned", false,
+                        "needsRoleAssignment", true
+                ));
+            } else {
+                return ResponseEntity.ok(Map.of(
+                        "userId", user.getId(),
+                        "email", user.getEmail(),
+                        "fullName", user.getFullName(),
+                        "role", user.getRole(),
+                        "roleAssigned", true
+                ));
+            }
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body(Map.of("error", "Error during Google authentication: " + e.getMessage()));
+        }
+    }
+
+    @Operation(summary = "User registration", description = "Registers a new user with email, password, and full name")
     @PostMapping("/register")
     public ResponseEntity<?> register(@RequestBody Map<String, String> userData) {
         try {
@@ -147,12 +172,7 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("userId", userId));
     }
 
-    @Operation(summary = "Assign role to user", description = "Assigns a role to the user and optionally sets a student ID for students",
-            responses = {
-                    @ApiResponse(responseCode = "200", description = "Role assigned successfully",
-                            content = @Content(schema = @Schema(implementation = User.class))),
-                    @ApiResponse(responseCode = "500", description = "Error assigning role", content = @Content)
-            })
+    @Operation(summary = "Assign role to user", description = "Assigns a role to the user and optionally sets a student ID for students")
     @PostMapping("/role")
     public ResponseEntity<?> assignRole(@RequestBody Map<String, String> roleData) {
         try {
@@ -180,6 +200,7 @@ public class AuthController {
         }
     }
 
+    // EXISTING LOGOUT ENDPOINT
     @Operation(summary = "User logout", description = "Logs out the current user and invalidates the session")
     @GetMapping("/logout")
     public ResponseEntity<?> logout(HttpServletRequest request, HttpServletResponse response) {
@@ -196,6 +217,7 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("message", "Successfully logged out"));
     }
 
+    // EXISTING STATUS ENDPOINT
     @Operation(summary = "Check authentication status", description = "Checks if the user is currently authenticated")
     @GetMapping("/status")
     public ResponseEntity<?> authStatus(HttpSession session) {

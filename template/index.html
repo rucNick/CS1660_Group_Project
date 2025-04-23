@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<html lang="en">
 
 <head>
   <meta charset="UTF-8">
@@ -7,10 +7,10 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
   <link rel="stylesheet" href="https://fonts.googleapis.com/icon?family=Material+Icons">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
-  <!-- <script src="https://www.gstatic.com/firebasejs/7.18/firebase-app.js"></script> -->
   <script src="https://www.gstatic.com/firebasejs/8.0/firebase.js"></script>
   <script src="/static/config.js"></script>
   <script src="/static/firebase.js"></script>
+  <script src="/static/auth-integration.js"></script>
   <link rel="icon"
     href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>(•‿•)</text></svg>">
 </head>
@@ -75,7 +75,6 @@
     </div>
   </div>
 
-
   <script>
     document.getElementById("checkIn").addEventListener("click", function () {
       checkIn();
@@ -91,8 +90,64 @@
 
       var modalElems = document.querySelectorAll('.modal');
       M.Modal.init(modalElems);
+      
+      // Check authentication status on page load
+      checkAuthStatus();
     });
-
+    
+    // Function to check auth status with AuthServer
+    async function checkAuthStatus() {
+      try {
+        const response = await fetch('/api/auth/status', {
+          credentials: 'include'
+        });
+        
+        if (response.ok) {
+          const data = await response.json();
+          console.log('Auth status:', data);
+          
+          if (data.authenticated) {
+            // If authenticated, update UI elements
+            document.getElementById('signInButton').innerText = 'Sign Out';
+            document.getElementById('bodyInfo').style.display = '';
+            
+            // Store auth data
+            localStorage.setItem('authUser', JSON.stringify({
+              userId: data.userId,
+              email: data.email, 
+              fullName: data.fullName,
+              role: data.role,
+              roleAssigned: data.roleAssigned
+            }));
+            
+            // Update URL if needed
+            const currentParams = new URLSearchParams(window.location.search);
+            if (!currentParams.has('role') && data.role) {
+              const url = new URL(window.location);
+              url.searchParams.set('role', data.role);
+              window.history.replaceState({}, '', url);
+            }
+            
+            // Initialize UI based on role
+            const role = data.role;
+            const courseId = currentParams.get('courseId') || '';
+            
+            if (role === 'Professor') {
+              document.getElementById('checkIn').style.display = 'none';
+              document.getElementById('viewAttendance').style.display = 'block';
+              document.getElementById('viewAttendance').addEventListener("click", function () {
+                viewAttendance(courseId);
+              });
+            } else if (role === 'Student') {
+              document.getElementById('viewAttendance').style.display = 'none';
+              document.getElementById('checkIn').style.display = 'block';
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Error checking auth status:', err);
+      }
+    }
   </script>
 
 </body>

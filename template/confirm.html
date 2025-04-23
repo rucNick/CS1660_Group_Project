@@ -7,6 +7,7 @@
   <script src="https://www.gstatic.com/firebasejs/8.0/firebase.js"></script>
   <script src="/static/config.js"></script>
   <script src="/static/firebase.js"></script>
+  <script src="/static/auth-integration.js"></script>
 </head>
 <body class="blue lighten-5">
   <div class="container center" style="margin-top: 50px;">
@@ -21,10 +22,33 @@
         const name = user.displayName;
         const uid = user.uid;
         const form = new URLSearchParams({ name, uid });
+        
+        // Get AuthServer user ID from localStorage if available
+        const storedUser = JSON.parse(localStorage.getItem('authUser') || '{}');
+        if (storedUser && storedUser.userId) {
+          form.append('authServerId', storedUser.userId);
+        }
+        
+        // Get URL parameters
+        const urlParams = new URLSearchParams(window.location.search);
+        const courseId = urlParams.get('courseId');
+        const role = urlParams.get('role') || storedUser.role;
+        
+        if (courseId) {
+          form.append('courseId', courseId);
+        }
+        
+        if (role) {
+          form.append('role', role);
+        }
 
+        // Mark attendance
         const res = await fetch("/attend", {
           method: "POST",
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          headers: { 
+            'Content-Type': 'application/x-www-form-urlencoded' 
+          },
+          credentials: 'include', // Include cookies for session
           body: form
         });
 
@@ -35,12 +59,20 @@
             <span style="font-size: 5rem;">✅</span>
             <h5>Attendance Confirmed</h5>
             <p><strong>${name}</strong> checked in at <em>${new Date(data.timestamp).toLocaleString()}</em></p>
+            <p><a href="/" class="btn blue">Back to Home</a></p>
           `;
         } else {
-          container.innerHTML = "<h5>Failed to mark attendance.</h5>";
+          container.innerHTML = `
+            <h5>Failed to mark attendance.</h5>
+            <p>${await res.text()}</p>
+            <p><a href="/" class="btn blue">Back to Home</a></p>
+          `;
         }
       } else {
-        document.getElementById("confirmationContainer").innerHTML = "<h5>You must be signed in to mark attendance.</h5>";
+        document.getElementById("confirmationContainer").innerHTML = `
+          <h5>You must be signed in to mark attendance.</h5>
+          <p><a href="/" class="btn blue">Back to Home</a></p>
+        `;
       }
     });
   </script>

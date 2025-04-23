@@ -25,8 +25,15 @@ public class SecurityConfig {
         http
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/auth/login", "/api/auth/register", "/api/auth/role", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        // Auth endpoints
+                        .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/oauth2/**", "/login/**").permitAll()
+                        // Static content and frontend
+                        .requestMatchers("/", "/index.html", "/static/**").permitAll()
+                        .requestMatchers("/confirm.html", "/attendance_list.html", "/professor.html").permitAll()
+                        // Swagger/OpenAPI
+                        .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
+                        // All other endpoints require authentication
                         .anyRequest().authenticated()
                 )
                 .formLogin(form -> form
