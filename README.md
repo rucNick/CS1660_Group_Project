@@ -9,7 +9,7 @@ This is a QR attendance app, using the cloud run and CI/CD assignments as a jump
 The app is deployed on Cloud Run, and performs auth and data storage through GCP as well. The diagram below best describes the app, however a brief verbal description may be warranted. The GitHub Actions workflow triggers every time code is pushed to the codebase; builds, dockerizes, and pushes the image to the Artifactory. Once manually deployed, the site can be reached at its base url. Once signed in and authenticated, the user must choose their role and for which class they are teaching or attending. Students are then redirected to a page where they can check in as an attendee of that class with an associated timestamp. If the user is a professor, they can view an attendance record of their class. 
 
 ## Architectural Diagram
-![image](https://github.com/user-attachments/assets/e7d25ffb-bb7e-4cfc-b0c7-941365b30dd2)
+![image](https://github.com/user-attachments/assets/59acd0df-1107-4cd7-987e-0ccc86eb8f1c)
 
 ## IAM Roles
 ![image](https://github.com/user-attachments/assets/b3800c5f-8ffa-4786-868f-243db760f948)
