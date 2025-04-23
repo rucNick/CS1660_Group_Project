@@ -21,7 +21,7 @@ import java.util.UUID;
 @Tag(name = "Auth Controller", description = "APIs for authentication and user management")
 @RestController
 @RequestMapping("/api/auth")
-@CrossOrigin(origins = {"https://auth-server-1043677821736.us-central1.run.app", "https://qr-attendance-455219.web.app",
+@CrossOrigin(origins = {"https://auth-server-1043677821736.us-central1.run.app", "https://qr-attendance-1043677821736.us-central1.run.app",
         "http://localhost:3000", "http://localhost:8000", "http://127.0.0.1:8000"},
         allowedHeaders = "*",
         allowCredentials = "true")
