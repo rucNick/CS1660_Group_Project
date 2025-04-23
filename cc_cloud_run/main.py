@@ -56,10 +56,10 @@ async def show_attendance_page(request: Request, courseId: str, user_role: str):
             "timestamp": data.get("timestamp")
         })
 
-    return templates.TemplateResponse("index.html", {
-        "request": request,
-        "attendance_records": attendance_data
-    })
+    return templates.TemplateResponse("attendance_list.html", {
+    "request": request,
+    "attendance_records": attendance_data
+})
 
 
 

@@ -56,32 +56,25 @@
   </div>
 
   <br>
-  
-  <div id="bodyInfo" style="display: flex; justify-content: center; flex-direction: column; align-items: center; height: 100vh;">
+
+  <div id="bodyInfo"
+    style="display: flex; justify-content: center; flex-direction: column; align-items: center; height: 100vh;">
     <div class="attendance marker" style="text-align: center;">
       <h3 id="AttedanceHeader">Attendance</h3>
       <div style="display: flex; flex-direction: column; gap: 10px; align-items: center;">
         <button class="btn" id="checkIn" style="display: none;">Check in</button>
         <div id="attendance-container" style="margin: 40px auto; max-width: 800px;">
           <button class="btn" id="viewAttendance" style="display: none;">View Attendance</button>
-          <h4 id="AttendanceRecordsHeader" class="header center">Attendance Records</h4>
-          <ul id="containerCollectionCenter" class="container collection center">
-            {% for record in attendance_records %}
-            <li class="collection-item avatar">
-              <i class="material-icons circle teal lighten-1">person</i>
-              <span class="title">Student:</span> <b>'{{ record.name }}'</b>
-              <p>Checked in at {{ record.timestamp}}</p>
-            </li>
-            {% endfor %}
-          </ul>
+          <div id="attendance-details"></div>
         </div>
       </div>
     </div>
-  
-    <div id="confirmationContainer" style="display: flex; justify-content: center; flex-direction: column; align-items: center;">
+
+    <div id="confirmationContainer"
+      style="display: flex; justify-content: center; flex-direction: column; align-items: center;">
     </div>
   </div>
-  
+
 
   <script>
     document.getElementById("checkIn").addEventListener("click", function () {

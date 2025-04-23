@@ -1,0 +1,10 @@
+<h4 id="AttendanceRecordsHeader" class="header center">Attendance Records</h4>
+<ul id="containerCollectionCenter" class="container collection center">
+    {% for record in attendance_records %}
+    <li class="collection-item avatar">
+        <i class="material-icons circle teal lighten-1">person</i>
+        <span class="title">Student:</span> <b>'{{ record.name }}'</b>
+        <p>Checked in at {{ record.timestamp}}</p>
+    </li>
+    {% endfor %}
+</ul>
