@@ -12,6 +12,8 @@ import org.springframework.core.io.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
 
+import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 
 @Configuration
@@ -25,14 +27,24 @@ public class FirestoreConfig {
         GoogleCredentials credentials;
 
         try {
-            //(for local development)
-            Resource credentialsFile = new ClassPathResource("qr-attendance-455219-6314e586df68.json");
+            // First try to use the mounted credential
+            File credentialsFile = new File("/app/credentials.json");
             if (credentialsFile.exists()) {
-                credentials = GoogleCredentials.fromStream(credentialsFile.getInputStream());
+                try (FileInputStream serviceAccountStream = new FileInputStream(credentialsFile)) {
+                    credentials = GoogleCredentials.fromStream(serviceAccountStream);
+                }
             } else {
-                credentials = GoogleCredentials.getApplicationDefault();
+                // Fall back to classpath resource for local development
+                Resource classPathResource = new ClassPathResource("qr-attendance-455219-6314e586df68.json");
+                if (classPathResource.exists()) {
+                    credentials = GoogleCredentials.fromStream(classPathResource.getInputStream());
+                } else {
+                    // Last resort - application default credentials
+                    credentials = GoogleCredentials.getApplicationDefault();
+                }
             }
         } catch (Exception e) {
+            e.printStackTrace();
             // Fallback to application default credentials
             credentials = GoogleCredentials.getApplicationDefault();
         }
@@ -46,7 +58,7 @@ public class FirestoreConfig {
         if (FirebaseApp.getApps().isEmpty()) {
             FirebaseApp.initializeApp(options);
         }
-        
+
         return FirestoreClient.getFirestore();
     }
 }
